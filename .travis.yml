@@ -32,4 +32,7 @@ script:
   - cd build
   - cmake ..
   - make
+  - cd ../..
+
+  # running DALES
   - LD_LIBRARY_PATH=dales/build/src python test.py
