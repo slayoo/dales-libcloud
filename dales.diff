@@ -1,0 +1,9 @@
+diff -ruN '--exclude=build' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.txt
+--- dales.orig/src/CMakeLists.txt	2014-11-26 20:40:51.059434900 +0100
++++ dales/src/CMakeLists.txt	2014-11-26 20:44:23.535423918 +0100
+@@ -3,3 +3,5 @@
+ add_executable(${target_name} ${sourcefiles})
+ target_link_libraries(${target_name} ${NETCDF_LIBS})
+ install(TARGETS dales4 DESTINATION ${CMAKE_BINARY_DIR})
++
++add_library("lib${target_name}" SHARED ${sourcefiles})

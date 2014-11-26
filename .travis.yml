@@ -27,9 +27,9 @@ script:
   - cd dales-libcloud
   - git clone --depth=1 git://gitorious.org/dales/dales.git
   - cd dales
-  #- patch -p1 < ../dales.diff
+  - patch -p1 < ../dales.diff
   - mkdir build
   - cd build
   - cmake ..
   - make
-  #- LD_LIBRARY_PATH=bin python ../kid.py
+  - LD_LIBRARY_PATH=dales/build/src python test.py
