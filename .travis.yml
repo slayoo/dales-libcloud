@@ -1,0 +1,35 @@
+language: cpp
+os:
+  - linux
+compiler:
+  - gcc
+
+before_install:
+  - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ trusty main universe multiverse"
+  - sudo apt-get update
+
+install:
+  - sudo apt-get install --no-install-recommends libnetcdfc7
+  - sudo apt-get install --no-install-recommends g++ gfortran libnetcdf-dev python-numpy python-cffi libblitz0-dev cmake libboost-python-dev libthrust-dev openmpi-bin
+
+  # libcloudphxx
+  - cd ..
+  - git clone --depth=1 git://github.com/igfuw/libcloudphxx.git
+  - cd libcloudphxx
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
+  - make
+  - sudo make install
+  - cd ../..
+
+script:
+  - cd dales-libcloud
+  - git clone --depth=1 git://gitorious.org/dales/dales.git
+  - cd dales
+  #- patch -p1 < ../dales.diff
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  #- LD_LIBRARY_PATH=bin python ../kid.py
