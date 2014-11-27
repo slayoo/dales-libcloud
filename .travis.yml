@@ -10,7 +10,7 @@ before_install:
 
 install:
   - sudo apt-get install --no-install-recommends libnetcdfc7
-  - sudo apt-get install --no-install-recommends g++ gfortran libnetcdf-dev python-numpy python-cffi libblitz0-dev cmake libboost-python-dev libthrust-dev mpich
+  - sudo apt-get install --no-install-recommends g++ gfortran libnetcdf-dev python-numpy python-cffi libblitz0-dev cmake libboost-python-dev libthrust-dev mpich libmpich-dev
 
   # libcloudphxx
   - cd ..
