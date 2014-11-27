@@ -1,3 +1,15 @@
+diff -ruN '--exclude=build' dales.orig/CMakeLists.txt dales/CMakeLists.txt
+--- dales.orig/CMakeLists.txt	2014-11-26 20:40:51.175434894 +0100
++++ dales/CMakeLists.txt	2014-11-27 13:06:15.539519798 +0100
+@@ -27,7 +27,7 @@
+   set(CMAKE_Fortran_FLAGS_RELEASE "-O3" CACHE STRING "")
+   set(CMAKE_Fortran_FLAGS_DEBUG "-traceback -fpe1 -O0 -g -check all" CACHE STRING "")
+ else()
+-  set(CMAKE_Fortran_COMPILER "mpif90")
++#  set(CMAKE_Fortran_COMPILER "mpif90")
+   set(CMAKE_Fortran_FLAGS "-finit-real=nan -W -Wall -fdefault-real-8 -ffree-line-length-none" CACHE STRING "")
+   set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3" CACHE STRING "")
+   set (CMAKE_Fortran_FLAGS_DEBUG   "-fbounds-check -fbacktrace -fno-f2c -O0 -g -ffpe-trap=invalid,zero,overflow" CACHE STRING "")
 diff -ruN '--exclude=build' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.txt
 --- dales.orig/src/CMakeLists.txt	2014-11-26 20:40:51.059434900 +0100
 +++ dales/src/CMakeLists.txt	2014-11-27 12:27:37.987639586 +0100

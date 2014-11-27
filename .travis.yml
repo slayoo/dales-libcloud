@@ -10,7 +10,7 @@ before_install:
 
 install:
   - sudo apt-get install --no-install-recommends libnetcdfc7
-  - sudo apt-get install --no-install-recommends g++ gfortran libnetcdf-dev python-numpy python-cffi libblitz0-dev cmake libboost-python-dev libthrust-dev libopenmpi-dev openmpi-bin
+  - sudo apt-get install --no-install-recommends g++ gfortran libnetcdf-dev python-numpy python-cffi libblitz0-dev cmake libboost-python-dev libthrust-dev mpich
 
   # libcloudphxx
   - cd ..
@@ -30,10 +30,10 @@ script:
   - patch -p1 < ../dales.diff
   - mkdir build
   - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+  - cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_Fortran_COMPILER=mpif90.mpich ..
   - make
   - sudo make install
   - cd ../..
 
   # running DALES
-  - mpirun -np 1 python test.py
+  - mpirun.mpich -np 1 python test.py
