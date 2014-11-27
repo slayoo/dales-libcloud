@@ -14,13 +14,13 @@ ffi.cdef("void main(int, char**);")
 
 
 # executing DALES with BOMEX set-up
-bomexdir = "../dales/cases/bomex/"
+bomexdir = "./dales/cases/bomex/"
 testdir = "./test/"
 argfile = "namoptions.001"
 
 os.mkdir(testdir)
 for f in ("lscale.inp.001", "prof.inp.001"):
-  os.symlink(bomexdir + f, testdir + f)
+  os.symlink('../' + bomexdir + f, testdir + f)
 shutil.copy(bomexdir + argfile, testdir)
 
 subprocess.call(['sed', '-i', '', '-e', 's/runtime    =  28800/runtime    =  100/', testdir + argfile])
