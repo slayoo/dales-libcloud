@@ -30,9 +30,10 @@ script:
   - patch -p1 < ../dales.diff
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
   - make
+  - sudo make install
   - cd ../..
 
   # running DALES
-  - LD_LIBRARY_PATH=dales/build/src python test.py
+  - mpirun -np 1 python test.py

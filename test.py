@@ -6,13 +6,13 @@ import libcloudphxx as libcl
 
 # CFFI stuff
 ffi = cffi.FFI()
-lib = ffi.dlopen('liblibdales4.so')
+lib = ffi.dlopen('libdales4.so')
 
 # C functions
 ffi.cdef("void save_ptr(char*,void*);")
 
 # Fortran functions
-ffi.cdef("void MAIN__();")
+ffi.cdef("void main();")
 
 # ...
-lib.MAIN__()
+lib.main()
