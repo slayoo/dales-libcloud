@@ -24,6 +24,8 @@ for f in ("lscale.inp.001", "prof.inp.001"):
 shutil.copy(bomexdir + argfile, testdir)
 
 subprocess.call(['sed', '-i', '', '-e', 's/runtime    =  28800/runtime    =  100/', testdir + argfile])
+subprocess.call(['sed', '-i', '', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
 
 os.chdir(testdir)
 lib.main(2, [ ffi.new("char[]", ""), ffi.new("char[]", argfile) ])
+
