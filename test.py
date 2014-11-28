@@ -4,7 +4,8 @@ import numpy, os, shutil, subprocess, cffi, libcloudphxx
 
 # CFFI stuff
 ffi = cffi.FFI()
-lib = ffi.dlopen('libdales4.so')
+clib = ffi.dlopen('ptrutil.so')
+flib = ffi.dlopen('libdales4.so')
 
 # C functions
 ffi.cdef("void save_ptr(char*,void*);")
@@ -26,6 +27,10 @@ shutil.copy(bomexdir + argfile, testdir)
 subprocess.call(['sed', '-i', '', '-e', 's/runtime    =  28800/runtime    =  100/', testdir + argfile])
 subprocess.call(['sed', '-i', '', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
 
-os.chdir(testdir)
-lib.main(2, [ ffi.new("char[]", ""), ffi.new("char[]", argfile) ])
+@ffi.callback("void()")
+def micro_step():
+  print "BQQ"
 
+os.chdir(testdir)
+clib.save_ptr("/tmp/micro_step.ptr", micro_step)
+flib.main(2, [ ffi.new("char[]", ""), ffi.new("char[]", argfile) ])
