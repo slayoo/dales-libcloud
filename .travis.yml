@@ -29,7 +29,7 @@ script:
   - cd dales-libcloud
   - mv dales dales.newfiles
   - git clone --depth=1 git://gitorious.org/dales/dales.git
-  - cp -R dales.newfiles dales
+  - cp -R dales.newfiles/* dales/
   - rm -rf dales.newfiles
   - cd dales
   - patch -p1 < ../dales.diff
