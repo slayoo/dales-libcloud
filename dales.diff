@@ -1,4 +1,4 @@
-diff -ruN '--exclude=build' dales.orig/CMakeLists.txt dales/CMakeLists.txt
+diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/CMakeLists.txt dales/CMakeLists.txt
 --- dales.orig/CMakeLists.txt	2014-11-26 20:40:51.175434894 +0100
 +++ dales/CMakeLists.txt	2014-11-27 13:06:15.539519798 +0100
 @@ -27,7 +27,7 @@
@@ -10,7 +10,8 @@ diff -ruN '--exclude=build' dales.orig/CMakeLists.txt dales/CMakeLists.txt
    set(CMAKE_Fortran_FLAGS "-finit-real=nan -W -Wall -fdefault-real-8 -ffree-line-length-none" CACHE STRING "")
    set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3" CACHE STRING "")
    set (CMAKE_Fortran_FLAGS_DEBUG   "-fbounds-check -fbacktrace -fno-f2c -O0 -g -ffpe-trap=invalid,zero,overflow" CACHE STRING "")
-diff -ruN '--exclude=build' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.txt
+Binary files dales.orig/.git/index and dales/.git/index differ
+diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.txt
 --- dales.orig/src/CMakeLists.txt	2014-11-26 20:40:51.059434900 +0100
 +++ dales/src/CMakeLists.txt	2014-11-27 14:55:02.079182459 +0100
 @@ -1,5 +1,10 @@
@@ -27,3 +28,23 @@ diff -ruN '--exclude=build' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.t
 +target_link_libraries("lib${target_name}" ${NETCDF_LIBS})
 +set_target_properties("lib${target_name}" PROPERTIES OUTPUT_NAME ${target_name})
 +install(TARGETS "lib${target_name}" LIBRARY DESTINATION lib)
+diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/program.f90 dales/src/program.f90
+--- dales.orig/src/program.f90	2014-11-26 20:40:51.055434900 +0100
++++ dales/src/program.f90	2014-11-28 11:53:11.895677477 +0100
+@@ -147,6 +147,7 @@
+   !use modprojection,   only : initprojection, projection
+   use modchem,         only : initchem,twostep
+ 
++  use modlibcloud,     only : piggyback_libcloudphxx_lgrngn
+ 
+   implicit none
+ 
+@@ -227,6 +228,8 @@
+     call microsources !Drizzle etc.
+     call samptend(tend_micro)
+ 
++    call piggyback_libcloudphxx_lgrngn
++
+ !------------------------------------------------------
+ !   3.4   EXECUTE ADD ONS
+ !------------------------------------------------------
