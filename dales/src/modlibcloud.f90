@@ -54,12 +54,16 @@ module modlibcloud
   subroutine piggyback_libcloudphxx_lgrngn
     implicit none
 
+    character(10) :: uid, pid
+
     if (associated(fptr) .eqv. .false.) then 
       ! assert for numerical precision
       if (sizeof(a_real) .ne. c_double) stop("DALES does not use double precision!")
 
-      ! load pointer to Python micro_step() routine
-      call load_ptr("/tmp/micro_step.ptr" // c_null_char,cptr)
+      ! load pointer to Python micro_step() routine (getuid() and getpid() are GNU extensions)
+      write (uid, "(I10.0)") getuid()
+      write (pid, "(I10.0)") getpid()
+      call load_ptr("/tmp/micro_step-" // trim(adjustl(uid)) // "-" // trim(adjustl(pid)) // ".ptr" // c_null_char,cptr)
  
       ! associate the C pointer with the F pointer
       call c_f_procpointer(cptr, fptr)

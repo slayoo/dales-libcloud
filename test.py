@@ -3,6 +3,8 @@
 import numpy, os, shutil, subprocess, cffi, libcloudphxx, traceback
 from params import params
 
+ptrfname = "/tmp/micro_step-" + str(os.getuid()) + "-" + str(os.getpid()) + ".ptr"
+
 # CFFI stuff
 ffi = cffi.FFI()
 clib = ffi.dlopen('ptrutil.so')
@@ -55,6 +57,10 @@ def micro_step(      rhobf  , s1_rhobf, u0,      s1_u0, s2_u0, s3_u0, v0,      s
     thl0  = ptr2np(thl0,  s1_thl0, s2_thl0, s3_thl0)
 
     if first_timestep:
+
+      # first, removing the no-longer-needed pointer file
+      os.unlink(ptrfname)
+
       # sanity checks 
       assert u0.shape[0] == v0.shape[0] == w0.shape[0] == qt0.shape[0] == thl0.shape[0]
       assert u0.shape[1] == v0.shape[1] == w0.shape[1] == qt0.shape[1] == thl0.shape[1]
@@ -115,7 +121,9 @@ def micro_step(      rhobf  , s1_rhobf, u0,      s1_u0, s2_u0, s3_u0, v0,      s
   else:
     return True
 
+# storing the pointer
+clib.save_ptr(ptrfname, micro_step)
+
 # running DALES
 os.chdir(testdir)
-clib.save_ptr("/tmp/micro_step.ptr", micro_step)
 flib.main(2, [ ffi.new("char[]", ""), ffi.new("char[]", argfile) ])
