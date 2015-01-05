@@ -16,7 +16,7 @@ module modlibcloud
     end
 
     ! Python function used to call C++ library
-    subroutine micro_step_py(              &
+    function micro_step_py(                &
       rhobf, s1_rhobf,                     &
       u0,    s1_u0,   s2_u0,   s3_u0,      &
       v0,    s1_v0,   s2_v0,   s3_v0,      &
@@ -25,8 +25,9 @@ module modlibcloud
       thl0,  s1_thl0, s2_thl0, s3_thl0     &
     ) bind(c) 
 
-      use iso_c_binding, only: c_double, c_int
+      use iso_c_binding, only: c_double, c_int, c_bool
 
+      logical(c_bool) :: micro_step_py
       integer(c_int), intent(in), value :: &
         s1_rhobf,                          &
         s1_u0,   s2_u0,   s3_u0,           &
@@ -66,13 +67,13 @@ module modlibcloud
 
     if (rk3step /= 3) return 
 
-    call fptr(                                             &
+    if (.not. fptr(                                        &
       rhobf, size(rhobf, 1),                               &
       u0,    size(u0,    1), size(u0,   2), size(u0,   3), &
       v0,    size(v0,    1), size(v0,   2), size(v0,   3), &
       w0,    size(w0,    1), size(w0,   2), size(w0,   3), &
       qt0,   size(qt0,   1), size(qt0,  2), size(qt0,  3), &
       thl0,  size(thl0,  1), size(thl0, 2), size(thl0, 3)  &
-    )
+    )) stop("Error in Python!!!")
   end
 end module
