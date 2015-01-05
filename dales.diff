@@ -1,4 +1,4 @@
-diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/CMakeLists.txt dales/CMakeLists.txt
+diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/CMakeLists.txt dales/CMakeLists.txt
 --- dales.orig/CMakeLists.txt	2014-11-26 20:40:51.175434894 +0100
 +++ dales/CMakeLists.txt	2014-12-01 16:18:10.034973179 +0100
 @@ -27,7 +27,7 @@
@@ -10,30 +10,7 @@ diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/CMakeLists.tx
    set(CMAKE_Fortran_FLAGS "-finit-real=nan -W -Wall -fdefault-real-8 -ffree-line-length-none" CACHE STRING "")
    set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3" CACHE STRING "")
    set (CMAKE_Fortran_FLAGS_DEBUG   "-fbounds-check -fbacktrace -fno-f2c -O0 -g -ffpe-trap=invalid,zero,overflow" CACHE STRING "")
-Binary files dales.orig/.git/index and dales/.git/index differ
-diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/.git/logs/HEAD dales/.git/logs/HEAD
---- dales.orig/.git/logs/HEAD	2014-11-26 20:40:51.199434893 +0100
-+++ dales/.git/logs/HEAD	2014-12-01 16:18:01.970973596 +0100
-@@ -1 +1 @@
--0000000000000000000000000000000000000000 eda534765be1b5361fa380c8ea43b72cc0a37225 slayoo <slayoo@igf.fuw.edu.pl> 1417030819 +0100	clone: from git://gitorious.org/dales/dales.git
-+0000000000000000000000000000000000000000 eda534765be1b5361fa380c8ea43b72cc0a37225 slayoo <slayoo@igf.fuw.edu.pl> 1417447081 +0100	clone: from git://gitorious.org/dales/dales.git
-diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/.git/logs/refs/heads/master dales/.git/logs/refs/heads/master
---- dales.orig/.git/logs/refs/heads/master	2014-11-26 20:40:51.199434893 +0100
-+++ dales/.git/logs/refs/heads/master	2014-12-01 16:18:01.970973596 +0100
-@@ -1 +1 @@
--0000000000000000000000000000000000000000 eda534765be1b5361fa380c8ea43b72cc0a37225 slayoo <slayoo@igf.fuw.edu.pl> 1417030819 +0100	clone: from git://gitorious.org/dales/dales.git
-+0000000000000000000000000000000000000000 eda534765be1b5361fa380c8ea43b72cc0a37225 slayoo <slayoo@igf.fuw.edu.pl> 1417447081 +0100	clone: from git://gitorious.org/dales/dales.git
-diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/.git/logs/refs/remotes/origin/HEAD dales/.git/logs/refs/remotes/origin/HEAD
---- dales.orig/.git/logs/refs/remotes/origin/HEAD	2014-11-26 20:40:51.199434893 +0100
-+++ dales/.git/logs/refs/remotes/origin/HEAD	2014-12-01 16:18:01.970973596 +0100
-@@ -1 +1 @@
--0000000000000000000000000000000000000000 eda534765be1b5361fa380c8ea43b72cc0a37225 slayoo <slayoo@igf.fuw.edu.pl> 1417030819 +0100	clone: from git://gitorious.org/dales/dales.git
-+0000000000000000000000000000000000000000 eda534765be1b5361fa380c8ea43b72cc0a37225 slayoo <slayoo@igf.fuw.edu.pl> 1417447081 +0100	clone: from git://gitorious.org/dales/dales.git
-Binary files dales.orig/.git/objects/pack/pack-047bd6913a453df344fa9c5e203280d63411f480.idx and dales/.git/objects/pack/pack-047bd6913a453df344fa9c5e203280d63411f480.idx differ
-Binary files dales.orig/.git/objects/pack/pack-047bd6913a453df344fa9c5e203280d63411f480.pack and dales/.git/objects/pack/pack-047bd6913a453df344fa9c5e203280d63411f480.pack differ
-Binary files dales.orig/.git/objects/pack/pack-bee4d605bc2c57ac07af1477733cdcbedd3f34d5.idx and dales/.git/objects/pack/pack-bee4d605bc2c57ac07af1477733cdcbedd3f34d5.idx differ
-Binary files dales.orig/.git/objects/pack/pack-bee4d605bc2c57ac07af1477733cdcbedd3f34d5.pack and dales/.git/objects/pack/pack-bee4d605bc2c57ac07af1477733cdcbedd3f34d5.pack differ
-diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.txt
+diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.txt
 --- dales.orig/src/CMakeLists.txt	2014-11-26 20:40:51.059434900 +0100
 +++ dales/src/CMakeLists.txt	2014-12-01 16:18:10.094973176 +0100
 @@ -1,5 +1,10 @@
@@ -50,7 +27,7 @@ diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/CMakeList
 +target_link_libraries("lib${target_name}" ${NETCDF_LIBS})
 +set_target_properties("lib${target_name}" PROPERTIES OUTPUT_NAME ${target_name})
 +install(TARGETS "lib${target_name}" LIBRARY DESTINATION lib)
-diff -ruN '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/program.f90 dales/src/program.f90
+diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/program.f90 dales/src/program.f90
 --- dales.orig/src/program.f90	2014-11-26 20:40:51.055434900 +0100
 +++ dales/src/program.f90	2014-12-01 16:18:10.090973176 +0100
 @@ -147,6 +147,7 @@
