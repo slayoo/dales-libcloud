@@ -1,2 +1,14 @@
 - coriolis component for particle motion?
+
 - DALES compilation warnings?
+
+- rho(t)? (Bussinesq/compressible):
+  - modthermodynamics.f90: 94   rhof(k) = presf(k)/(rd*thvf(k)*exnf(k))
+  - rhobf used in advection
+  - is rhobf dry?
+
+- does theta_l & qt approach assume saturation adjustment?
+
+- how to visualise? (no 3D fields in nc files?)
+
+- what after piggybacking?
