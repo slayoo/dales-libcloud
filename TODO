@@ -8,7 +8,15 @@
   - is rhobf dry?
 
 - does theta_l & qt approach assume saturation adjustment?
+  - satadj piggybacking vs saturation-dependent scheme?
 
 - how to visualise? (no 3D fields in nc files?)
 
 - what after piggybacking?
+
+- stochastic term for particle motion (f of TKE)
+
+- 8 calls to micro before first step?
+
+DALES suggestions:
+  - no t=0 output in fielddump

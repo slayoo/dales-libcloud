@@ -29,6 +29,7 @@ shutil.copy(bomexdir + argfile, testdir)
 
 subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  100/', testdir + argfile])
 subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
+subprocess.call(['sed', '-i', '-e', 's/lfielddump  = .false./lfielddump  = .true./', testdir + argfile])
 
 def ptr2np(ptr, size_1, size_2 = 1, size_3 = 1):
   return numpy.frombuffer(
