@@ -3,7 +3,7 @@
 
 module modlibcloud
 
-  use modglobal, only : rk3step!, i1, j1, k1 !i1, j1, timee
+  use modglobal, only : rk3step, rdt, dx, dy, dz, ntimee
   use modfields, only : rhof, u0, v0, w0, qt0, thl0
   use iso_c_binding, only: c_funptr, c_f_procpointer, c_null_char, c_double
 
@@ -17,7 +17,8 @@ module modlibcloud
 
     ! Python function used to call C++ library
     function micro_step_py(                &
-      rhof, s1_rhof,                       &
+      rdt, dx, dy, dz,                     &
+      rhof,  s1_rhof,                      &
       u0,    s1_u0,   s2_u0,   s3_u0,      &
       v0,    s1_v0,   s2_v0,   s3_v0,      &
       w0,    s1_w0,   s2_w0,   s3_w0,      &
@@ -28,6 +29,7 @@ module modlibcloud
       use iso_c_binding, only: c_double, c_int, c_bool
 
       logical(c_bool) :: micro_step_py
+
       integer(c_int), intent(in), value :: &
         s1_rhof,                           &
         s1_u0,   s2_u0,   s3_u0,           &
@@ -35,6 +37,10 @@ module modlibcloud
         s1_w0,   s2_w0,   s3_w0,           &
         s1_qt0,  s2_qt0,  s3_qt0,          &
         s1_thl0, s2_thl0, s3_thl0
+
+      real(c_double), intent(in), value :: &
+        rdt, dx, dy, dz                       
+
       real(c_double), intent(in) ::        &
         rhof(s1_rhof),                     &
         u0(s1_u0, s2_u0, s3_u0),           &
@@ -70,8 +76,10 @@ module modlibcloud
     end if
 
     if (rk3step /= 3) return 
+    if (ntimee == 0) return ! spinup
 
     if (.not. fptr(                                        &
+      rdt, dx, dy, dz,                                     &
       rhof,  size(rhof,  1),                               &
       u0,    size(u0,    1), size(u0,   2), size(u0,   3), &
       v0,    size(v0,    1), size(v0,   2), size(v0,   3), &

@@ -16,7 +16,7 @@ opts_init.sd_conc_mean = .01
 opts_init.dry_distros = { .61 : lognormal }
 
 opts = lgrngn.opts_t()
-opts.sstp_cond = 1
+opts.sstp_cond = 100
 opts.sstp_coal = 1
 opts.cond = True
 opts.coal = True

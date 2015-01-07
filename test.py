@@ -3,6 +3,9 @@
 import numpy, os, shutil, subprocess, cffi, libcloudphxx, traceback
 from params import params
 
+# skip NaN checks
+numpy.seterr(all='ignore')
+
 ptrfname = "/tmp/micro_step-" + str(os.getuid()) + "-" + str(os.getpid()) + ".ptr"
 
 # CFFI stuff
@@ -41,7 +44,6 @@ def ptr2np(ptr, size_1, size_2 = 1, size_3 = 1):
 prtcls = False
 first_timestep = True
 arrays = {}
-dx, dy, dz, dt = 0,0,0,0
 
 def th_std2dry(th, rv):
   from libcloudphxx.common import R_v, R_d, c_pd
@@ -50,10 +52,10 @@ def th_std2dry(th, rv):
 def rho_std2dry(rho, rv):
   return rho / (1 + rv) 
 
-@ffi.callback("bool( double*, int    , double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
-def micro_step(      rhof   , s1_rhof, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
+@ffi.callback("bool(double, double, double, double, double*, int    , double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
+def micro_step(     dt,     dx,     dy,     dz,     rhof   , s1_rhof, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
   try:
-    global prtcls, first_timestep, arrays, dx, dy, dz, dt
+    global prtcls, first_timestep, arrays#, dx, dy, dz, dt
 
     # exposing DALES data through numpy (no copying)
     rhof  = ptr2np(rhof,  s1_rhof)
@@ -76,10 +78,6 @@ def micro_step(      rhof   , s1_rhof, u0,      s1_u0, s2_u0, s3_u0, v0,      s1
 
       nx, ny, nz = qt0.shape[0]-2, qt0.shape[1]-2, qt0.shape[2]-1
 
-      # TODO! pass dx, dy, dz, dt
-      dx, dy, dz = 1, 1, 1
-      dt = 1
-
       # allocating arrays
       arrays["rhod"]    = numpy.empty((nz,))
       arrays["th_d"]    = numpy.empty((nx,   ny,   nz  ))
@@ -90,16 +88,18 @@ def micro_step(      rhof   , s1_rhof, u0,      s1_u0, s2_u0, s3_u0, v0,      s1
 
       # initialising libcloudph++
       params["opts_init"].dt = dt
+      params["opts_init"].dx, params["opts_init"].dy, params["opts_init"].dz = dx, dy, dz
       params["opts_init"].nx, params["opts_init"].ny, params["opts_init"].nz = nx, ny, nz
       params["opts_init"].x1, params["opts_init"].y1, params["opts_init"].z1 = dx*nx, dy*ny, dz*nz #TODO: double check
       prtcls = libcloudphxx.lgrngn.factory(params["backend"], params["opts_init"])
 
       # calculating rho_d profile (constant-in-time)
-      arrays["rhod"][    :] = rho_std2dry(
+      arrays["rhod"][:] = rho_std2dry(
         rhof[            0:-1], 
         qt0[ 1:-1, 1:-1, 0:-1].mean(axis=0).mean(axis=0)
       )
-
+    else:
+      assert dt == params["opts_init"].dt
 
     # converting data from DALES for use with the library
     # - DALES has an unused top level
