@@ -4,7 +4,7 @@
 module modlibcloud
 
   use modglobal, only : rk3step, rdt, dx, dy, dz, ntimee
-  use modfields, only : rhobf, rhobh, rhof, u0, v0, w0, qt0, thl0
+  use modfields, only : rhobf, rhobh, u0, v0, w0, qt0, thl0, exnf
   use iso_c_binding, only: c_funptr, c_f_procpointer, c_null_char, c_double
 
   interface
@@ -20,7 +20,7 @@ module modlibcloud
       rdt, dx, dy, dz,                     &
       rhobf, s1_rhobf,                     &
       rhobh, s1_rhobh,                     &
-      rhof,  s1_rhof,                      &
+      exnf,  s1_exnf,                      &
       u0,    s1_u0,   s2_u0,   s3_u0,      &
       v0,    s1_v0,   s2_v0,   s3_v0,      &
       w0,    s1_w0,   s2_w0,   s3_w0,      &
@@ -35,7 +35,7 @@ module modlibcloud
       integer(c_int), intent(in), value :: &
         s1_rhobf,                          &
         s1_rhobh,                          &
-        s1_rhof,                           &
+        s1_exnf,                           &
         s1_u0,   s2_u0,   s3_u0,           &
         s1_v0,   s2_v0,   s3_v0,           &
         s1_w0,   s2_w0,   s3_w0,           &
@@ -48,7 +48,7 @@ module modlibcloud
       real(c_double), intent(in) ::        &
         rhobf(s1_rhobf),                   &
         rhobh(s1_rhobh),                   &
-        rhof(s1_rhof),                     &
+        exnf(s1_exnf),                     &
         u0(s1_u0, s2_u0, s3_u0),           &
         v0(s1_v0, s2_v0, s3_v0),           &
         w0(s1_w0, s2_w0, s3_w0),           &
@@ -88,7 +88,7 @@ module modlibcloud
       rdt, dx, dy, dz,                                     &
       rhobf, size(rhobf, 1),                               &
       rhobh, size(rhobh, 1),                               &
-      rhof,  size(rhof,  1),                               &
+      exnf,  size(exnf, 1),                                &
       u0,    size(u0,    1), size(u0,   2), size(u0,   3), &
       v0,    size(v0,    1), size(v0,   2), size(v0,   3), &
       w0,    size(w0,    1), size(w0,   2), size(w0,   3), &
