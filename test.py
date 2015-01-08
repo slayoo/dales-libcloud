@@ -100,7 +100,22 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       params["opts_init"].dx, params["opts_init"].dy, params["opts_init"].dz = dx, dy, dz
       params["opts_init"].nx, params["opts_init"].ny, params["opts_init"].nz = nx, ny, nz
       params["opts_init"].x1, params["opts_init"].y1, params["opts_init"].z1 = dx*nx, dy*ny, dz*nz #TODO: double check
-      prtcls = libcloudphxx.lgrngn.factory(params["backend"], params["opts_init"])
+
+      try:
+        print("Trying with CUDA backend..."),
+        prtcls = libcloudphxx.lgrngn.factory(libcloudphxx.lgrngn.backend_t.CUDA, params["opts_init"])
+        print (" OK!")
+      except:
+        print (" KO!")
+        try:
+          print("Trying with OpenMP backend..."),
+          prtcls = libcloudphxx.lgrngn.factory(libcloudphxx.lgrngn.backend_t.OpenMP, params["opts_init"])
+          print (" OK!")
+        except:
+          print (" KO!")
+          print("Trying with serial backend..."),
+          prtcls = libcloudphxx.lgrngn.factory(libcloudphxx.lgrngn.backend_t.serial, params["opts_init"])
+          print (" OK!")
 
       # calculating rho_d profile (constant-in-time)
       # assuming there is no liquid water at t==0

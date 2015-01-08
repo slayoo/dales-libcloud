@@ -26,7 +26,6 @@ opts.chem = False
 opts.kernel = lgrngn.kernel_t.geometric
 
 params = {
-  "backend"   : lgrngn.backend_t.serial,
   "opts"      : opts,
   "opts_init" : opts_init
 }
