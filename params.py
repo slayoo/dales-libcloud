@@ -12,7 +12,7 @@ def lognormal(lnr):
 
 
 opts_init = lgrngn.opts_init_t()
-opts_init.sd_conc_mean = .01
+opts_init.sd_conc_mean = 10
 opts_init.dry_distros = { .61 : lognormal }
 
 opts = lgrngn.opts_t()

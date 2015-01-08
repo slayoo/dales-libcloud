@@ -4,7 +4,7 @@
 
 - rho(t)? (Bussinesq/compressible):
   - modthermodynamics.f90: 94   rhof(k) = presf(k)/(rd*thvf(k)*exnf(k))
-  - rhobf used in advection
+  - rhobf/rhobh is used in advection
   - is rhobf dry?
   - czy rhof-rho_d to rho_v -> r_v?
 
