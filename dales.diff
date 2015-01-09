@@ -27,9 +27,22 @@ diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.o
 +target_link_libraries("lib${target_name}" ${NETCDF_LIBS})
 +set_target_properties("lib${target_name}" PROPERTIES OUTPUT_NAME ${target_name})
 +install(TARGETS "lib${target_name}" LIBRARY DESTINATION lib)
+diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/modfielddump.f90 dales/src/modfielddump.f90
+--- dales.orig/src/modfielddump.f90	2014-11-26 20:40:51.055434900 +0100
++++ dales/src/modfielddump.f90	2015-01-09 15:46:26.275736484 +0100
+@@ -82,7 +82,7 @@
+     call MPI_BCAST(lbinary     ,1,MPI_LOGICAL,0,comm3d,ierr)
+     idtav = dtav/tres
+ 
+-    tnext      = idtav   +btime
++    tnext      = btime
+     if(.not.(lfielddump)) return
+     dt_lim = min(dt_lim,tnext)
+ 
+Binary files dales.orig/src/.modthermodynamics.f90.swp and dales/src/.modthermodynamics.f90.swp differ
 diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/program.f90 dales/src/program.f90
 --- dales.orig/src/program.f90	2014-11-26 20:40:51.055434900 +0100
-+++ dales/src/program.f90	2014-12-01 16:18:10.090973176 +0100
++++ dales/src/program.f90	2015-01-07 20:55:43.875329519 +0100
 @@ -147,6 +147,7 @@
    !use modprojection,   only : initprojection, projection
    use modchem,         only : initchem,twostep
