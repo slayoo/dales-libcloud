@@ -31,7 +31,7 @@ for f in ("lscale.inp.001", "prof.inp.001"):
   os.symlink('../' + bomexdir + f, testdir + f)
 shutil.copy(bomexdir + argfile, testdir)
 
-subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  100/', testdir + argfile])
+subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  20/', testdir + argfile]) # keep this setting low for travis!
 subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
 subprocess.call(['sed', '-i', '-e', 's/lfielddump  = .false./lfielddump  = .true./', testdir + argfile])
 
