@@ -22,6 +22,10 @@
 - should we call libcloud before or after "call thermodynamics"? (what about precip terms?)
   -> how to generate supersaturation?
 
+- MicroHH
+
+- dt=20s  ->  another way to cope with S needed?
+
 DALES suggestions:
   - no t=0 output in fielddump
   - why dt is integer?

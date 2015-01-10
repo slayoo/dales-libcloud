@@ -2,6 +2,7 @@
 
 import numpy, os, shutil, subprocess, cffi, libcloudphxx, traceback, math
 from params import params
+from diagnostics import diagnostics
 
 # skip NaN checks
 numpy.seterr(all='ignore')
@@ -45,7 +46,7 @@ prtcls = False
 first_timestep = True
 arrays = {}
 
-# constants from DALES #TODO: allow overriding them in libcloud?
+# constants from DALES #TODO: allow overriding them in libcloud? or override them in DALES?
 L = 2.5e6
 c_pd = 1004.
 p_1000 = 100000.
@@ -67,6 +68,9 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     global prtcls, first_timestep, arrays#, dx, dy, dz, dt
 
     # exposing DALES data through numpy (no copying)
+    # - DALES has an unused top level
+    # - DALES has unit-length halo in x and y
+
     #TODO: some only in the first timestep?
     rhobf = ptr2np(rhobf, s1_rhobf)
     rhobh = ptr2np(rhobh, s1_rhobh)
@@ -139,20 +143,15 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
 
       #TODO: assert for invariant rho_d
 
-    # converting data from DALES for use with the library
-    # - DALES has an unused top level
-    # - DALES has unit-length halo in x and y
+      #TODO: assert for no streaching (constant dz)
 
-    # TODO: reuse it from previous diagnostics?
     # TODO: shouldn't advection be decoupled from condensation?
-    prtcls.diag_wet_rng(0, 1) #TODO: range?
+    prtcls.diag_all()
     prtcls.diag_wet_mom(3)
     qc = numpy.frombuffer(prtcls.outbuf()).reshape(arrays["rv"].shape) * 4./3. * math.pi * rho_w
     
     arrays["rv"  ][:,:,:] = qt0[1:-1, 1:-1, 0:-1] - qc
     arrays["th_d"] = th_std2dry(thl0[1:-1, 1:-1, 0:-1] + qc / exnf[0:-1] * L / c_pd, arrays["rv"])
-
-    print numpy.amin(qc), numpy.amax(qc), numpy.amin(arrays["rv"  ]), numpy.amax(arrays["rv"  ])
 
     # assert if temperature is properly recovered from rho_d and th_d?
     # (also assuming thl == theta hence only at t == 0)
@@ -165,7 +164,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
               mxdiff, 
               exnf[k] * thl0[i+1, j+1, k] - libcloudphxx.common.T(arrays["th_d"][i,j,k], arrays["rhod"][k])
             )
-      assert mxdiff < 0.01
+      assert mxdiff < 0.05
 
     #TODO: asserts to understand rhob vs. exner
 
@@ -174,18 +173,13 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     arrays["rhod_Cy"][:, :, :] = v0[1:-1, 1:,   0:-1] * dt / dy * rhobf[0:-1].reshape(1,1,rhobf.shape[0]-1)
     arrays["rhod_Cz"][:, :, :] = w0[1:-1, 1:-1, 0:  ] * dt / dz * rhobh[0:  ].reshape(1,1,rhobh.shape[0]  ) 
 
-    # initialising the particles 
     if first_timestep:
-      print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-      print "+ Python: initialising particle properties (call to C++) +"
-      print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+      # initialising particle properties
       prtcls.init(arrays["th_d"], arrays["rv"], arrays["rhod"])
-      #diagnostics(prtcls, 1, size_x, size_z) # writing down state at t=0
+      # writing down state at t=0
+      diagnostics(prtcls)
 
     # the timestepping
-    print "++++++++++++++++++++++++++++++++++++++"
-    print "+ Python: timestepping (call to C++) +"
-    print "++++++++++++++++++++++++++++++++++++++"
     prtcls.step_sync(
       params["opts"], 
       arrays["th_d"], 
@@ -196,6 +190,8 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       arrays["rhod"]
     ) 
     prtcls.step_async(params["opts"])
+
+    diagnostics(prtcls) 
 
     first_timestep = False
   except:
