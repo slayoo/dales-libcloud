@@ -7,6 +7,7 @@
   - rhobf/rhobh is used in advection
   - is rhobf dry?
   - czy rhof-rho_d to rho_v -> r_v?
+  - which rho for calculating "paths"
 
 - does theta_l & qt approach assume saturation adjustment?
   - satadj piggybacking vs saturation-dependent scheme?
@@ -25,6 +26,8 @@
 - MicroHH
 
 - dt=20s  ->  another way to cope with S needed?
+
+- GPU memory
 
 DALES suggestions:
   - no t=0 output in fielddump

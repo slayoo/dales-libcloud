@@ -31,7 +31,7 @@ for f in ("lscale.inp.001", "prof.inp.001"):
   os.symlink('../' + bomexdir + f, testdir + f)
 shutil.copy(bomexdir + argfile, testdir)
 
-subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  20/', testdir + argfile]) # keep this setting low for travis!
+subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  ' + str(params["runtime"]) + '/', testdir + argfile]) 
 subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
 subprocess.call(['sed', '-i', '-e', 's/lfielddump  = .false./lfielddump  = .true./', testdir + argfile])
 
@@ -58,9 +58,6 @@ rho_w = 1e3
 def th_std2dry(th, rv):
   from libcloudphxx.common import R_v, R_d, c_pd
   return th * (1 + rv * R_v / R_d)**(R_d/c_pd)
-
-def rho_std2dry(rho, rv):
-  return rho / (1 + rv) 
 
 @ffi.callback("bool(double, double, double, double, double*, int,      double*, int,      double*, int,     double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
 def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   s1_rhobh, exnf,    s1_exnf, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
@@ -186,8 +183,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       arrays["rv"], 
       arrays["rhod_Cx"],
       arrays["rhod_Cy"],
-      arrays["rhod_Cz"],
-      arrays["rhod"]
+      arrays["rhod_Cz"]
     ) 
     prtcls.step_async(params["opts"])
 
