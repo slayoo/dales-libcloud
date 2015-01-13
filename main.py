@@ -2,7 +2,7 @@
 
 import numpy, os, shutil, subprocess, cffi, libcloudphxx, traceback, math
 from params import params
-from diagnostics import diagnostics
+from diag import diag
 
 # skip NaN checks
 numpy.seterr(all='ignore')
@@ -62,7 +62,7 @@ def th_std2dry(th, rv):
 @ffi.callback("bool(double, double, double, double, double*, int,      double*, int,      double*, int,     double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
 def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   s1_rhobh, exnf,    s1_exnf, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
   try:
-    global prtcls, first_timestep, arrays#, dx, dy, dz, dt
+    global prtcls, first_timestep, arrays
 
     # exposing DALES data through numpy (no copying)
     # - DALES has an unused top level
@@ -185,7 +185,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       arrays["rhod_Cy"],
       arrays["rhod_Cz"]
     ) 
-    prtcls.step_async(params["opts"])
+    prtcls.step_async(params["opts"]) #TODO: handle the async logic
 
     diagnostics(prtcls) 
 

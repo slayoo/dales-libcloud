@@ -42,5 +42,5 @@ script:
 
   # running DALES
   - gcc -fPIC -shared ptrutil.c -o ptrutil.so
-  # TODO: -O flag to disable assertions
-  - LD_LIBRARY_PATH=. LD_PRELOAD=ptrutil.so mpirun.mpich -np 1 python test.py 
+  - LD_LIBRARY_PATH=. LD_PRELOAD=ptrutil.so mpirun.mpich -np 1 python main.py 
+  - LD_LIBRARY_PATH=. LD_PRELOAD=ptrutil.so mpirun.mpich -np 1 python -O main.py 

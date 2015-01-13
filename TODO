@@ -1,34 +1,75 @@
-- coriolis component for particle motion?
+* coupling / tech (with Dorota Jarecka):
+  - source files:       LOC
+    - dales.diff        ~10  (CMake: shared lib & hardcoded mpi compiler; fielddump @t=0; modlibcloud call)
+    - modlibcloud.f90  ~100  (load fprt; call Python passing dt,dx,rhob,exnf,uvw,qt,th; skip rk3 & spinup; error handing)
+    - ptrutil.c         ~30  (file store/load f-ction pointer - impossible in Fortran?; cubmersone in Python)
+    - main.py          ~200  (Py->C->F->Py logic; state var conversion (with sanity checks); grid geometry; lib & diag calls; DALES namelist overrides)
+    - params.py         ~30  (process toggling; aerosol; numerical params - sd_conc, substeps)
+    - diag.py          ~100  (fielddump-compatible separate nc file for cloud properties; only place where C/F memory layout conv needed additional calc.)
+    - .travis.yml       ~50  (automated in-the-cloud test on a fresh Ubuntu install; incl. DALES clone, patch & compilation)
+    - plot.py           ~50  (wip, uses Python-gnuplot)
+  - compiled:
+    - ptrutil.so (to be loaded via LD_SO_PRELOAD)
+    - libdales4.so (system-installed)
+  - controll flow:
+    - DALES as shared lib loaded from Python;
+    - Python stores a f-ction pointer in filesystem; 
+    - F loads it and calls Python f-ction which calls libcloudph++ through Python bindings
+    - rationale: 
+      - minimal changes in DALES;
+      - avoid F-C++ nightmare by using pre-existing Python packages (CFFI, Boost.Python)
+  - summary:
+    - sorry for the delay!
+    - extreamly usefull for testing libcloudph++ & for HARMONIA workflow
+    - GPU - 1-st time so useful
+    - library approach: failure / success?
+      - no code modification (save for TODOs - 1st try in 3D) ...
+      - ... but .5 kLOC
 
-- DALES compilation warnings?
+* coupling / phys:
+  - rho/exnf:
+    - rhobf/rhobh is used in advection 
+    - exnf (consistent with rhof, modthermodynamics.f90: 94) is used to derive rho_d 
+    - Q: is it correct that rho_d is constant in time? 
+    - Q: how rhob is related with rho?
+    - Q: why DALES uses rhof and not rho_d to calculate LWP? (modtimestat.f90)
+    - Q: implications of Bussinesq/compressible choice for rho
+  - theta_l/qt
+    - theta_l-qt approach assumes saturation adjustment (issue? satadj piggybacking vs saturation-dependent scheme)
+    - how to generate supersaturation? -> use SD r_v (issue: 1 dt lag)
+    - should we call libcloud before or after "call thermodynamics"? (what about precip terms?)
 
-- rho(t)? (Bussinesq/compressible):
-  - modthermodynamics.f90: 94   rhof(k) = presf(k)/(rd*thvf(k)*exnf(k))
-  - rhobf/rhobh is used in advection
-  - is rhobf dry?
-  - czy rhof-rho_d to rho_v -> r_v?
-  - which rho for calculating "paths"
+* BOMEX set-up
+  - dt=20s  ->  another way to cope with S needed? (-> postdoc!)
+  - GPU memory -> 10 sd/cell -> ~1GB
+  - aerosol?
+  - no distmem-parallelisation yet
+  - current limitations: geometric collisions, no breakup, supersat. prediction
+    (but BOMEX considered a no-rain set-up)
 
-- does theta_l & qt approach assume saturation adjustment?
-  - satadj piggybacking vs saturation-dependent scheme?
+* misc DALES questions:
+  - what happens during spinup? (8 calls to micro before first step?)
+  - what is usually used to visualise?
+  - DALES compilation warnings
 
-- how to visualise? (no 3D fields in nc files?)
+* seminar:
+  - 
 
-- what after piggybacking?
+* misc:
+  - MicroHH
+  - BAMS 2xlib paper?
+  - warsztaty po EGU
 
-- stochastic term for particle motion (f of TKE)
+* what next...
+  - lib: flags for qt/th_l? overriding constants?
+  - coriolis component for particle motion?
+  - stochastic term for particle motion (f of TKE) - how to test if needed?
+  - 1st -> explore piggybacking
+  - supersaturation?
+  - non-piggybacking?
 
-- what happens during spinup? (8 calls to micro before first step?)
-
-- should we call libcloud before or after "call thermodynamics"? (what about precip terms?)
-  -> how to generate supersaturation?
-
-- MicroHH
-
-- dt=20s  ->  another way to cope with S needed?
-
-- GPU memory
-
-DALES suggestions:
-  - no t=0 output in fielddump
-  - why dt is integer?
+* mentoring:
+  - reviews
+  - teaching
+  - postdoc (MC?)
+  - hints on handling contributions

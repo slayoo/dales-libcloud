@@ -1,4 +1,4 @@
-! autor: Sylweter Arabas
+! autor: Sylwester Arabas
 ! license: GPL
 
 module modlibcloud

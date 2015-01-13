@@ -78,14 +78,14 @@ def diagnostics(prtcls):
     f.variables['qc'][rec,:,:,:] = getbuf(prtcls)
     prtcls.diag_wet_mom(2)
     f.variables['r_eff'][rec,:,:,:] = f.variables['qc'][rec,:,:,:] / getbuf(prtcls)
-    f.variables['qc'][rec,:,:,:] *= 4./3 * math.pi # * rho_w
+    f.variables['qc'][rec,:,:,:] *= 4./3 * math.pi # * rho_w - TODO! 1e3
 
     # qr & nr
     prtcls.diag_wet_rng(th_cr, 1)
     prtcls.diag_wet_mom(0)
     f.variables['nr'][rec,:,:,:] = getbuf(prtcls)
     prtcls.diag_wet_mom(3)
-    f.variables['qr'][rec,:,:,:] = getbuf(prtcls) * 4./3 * math.pi # * rho_w
+    f.variables['qr'][rec,:,:,:] = getbuf(prtcls) * 4./3 * math.pi # * rho_w - TODO: 1e3!
 
   # incrementing timestep counter
   t = t+1
