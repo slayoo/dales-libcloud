@@ -1,0 +1,111 @@
+\documentclass{beamer}
+\usepackage{nicefrac}
+\newcommand{\fram}[1]{
+  \frame{
+    \begin{columns}\begin{column}{1.15\textwidth}
+    \frametitle{\footnotesize 
+      \!\!\!DALES/libcloudph++: proof-of-concept test
+      (dt\textsubscript{adv}=20s,\,dt\textsubscript{cond}=0.5s,\,dz=40m,\,10\,SD/cell)\!\!\!
+    }
+    #1
+    \end{column}\end{columns}
+  }
+}
+\usepackage{fixltx2e}
+\begin{document}
+  \frame{
+    \frametitle{DALES/libcloudph++ coupling: technicalities}
+    \url{https://github.com/slayoo/dales-libcloud}:
+    \begin{description}
+      \item[dales.diff~~~~~~{\color{gray}($\sim$10 LoC)}]{}
+      \item[modlibcloud.f90~{\color{gray}($\sim$100 LoC)}]{}
+      \item[ptrutil.c~~~~~~~{\color{gray}($\sim$30 LoC)}]{}
+      \item[main.py~~~~~~~~~{\color{gray}($\sim$200 LoC)}]{}
+      \item[params.py~~~~~~~{\color{gray}($\sim$30 LoC)}]{}
+      \item[diag.py~~~~~~~~~{\color{gray}($\sim$100 LoC)}]{}
+      \item[.travis.yml~~~~~{\color{gray}($\sim$50 LoC)}]{}
+      \item[plot.py~~~~~~~~~{\color{gray}($\sim$50 LoC)}]{}
+      \item[libcloudph++~~~~{\color{red} no modifications}]{}
+    \end{description}
+  }
+
+  \frame{
+    \frametitle{DALES/libcloudph++ coupling: ``physics''}
+    \begin{columns}[T]
+      \begin{column}{.5\textwidth}
+        libcloudph++/Lagrangian:
+        \begin{itemize}\small
+          \item $q_v(t;x,y,z)$
+          \item $\theta_d(t;x,y,z)$ {\color{gray}$=\left(\nicefrac{p_{0}}{p_d}\right)^{\nicefrac{R_d}{c_{pd}}}$}
+          \item $\rho_d(z)$ or $\rho_d(t;z)$ {\color{gray}$=\frac{p_d}{R_d T}$}
+          \item $\rho\vec{u}(t;x,y,z)$
+          \vspace{.2cm}
+          \item cloud forms only if S$>$1
+        \end{itemize}
+      \end{column}
+      \begin{column}{.5\textwidth}
+	DALES/bulk: 
+	\begin{itemize}\small
+	  \item ${\color<3->{red}q_t}(t; x,y,z)$ {\color{gray} $= q_v + q_l$}
+	  \item ${\color<3->{red}\theta_l}(t; x,y,z)$ {\color{gray} $=\theta - q_l\frac{L}{c_{pd}}$}
+	  \item ${\color<3->{red}\rho_b}(z)$ \& $\rho(t;z) / {\color<3->{red}\pi}(t;z)$
+          \item ${\color<3->{red}\vec{u}}(t; x,y,z)$ 
+          \vspace{.2cm}
+          \item $q_c$ diagnosed assuming S=1
+	\end{itemize}
+      \end{column}
+    \end{columns}
+
+    \uncover<2->{
+    \vspace{.2cm}
+    \hrule
+    \vspace{.2cm}
+
+    \begin{columns}[T]
+      \begin{column}{1.06\textwidth}
+	\begin{itemize}\small
+          \item 
+            $\rho_d(z) = \rho_d\left(\left.{\color<3->{red}\pi}\right|_{t=0}, \left.{\color<3->{red}\bar{q}_t}\right|_{t=0}, \left.{\color<3->{red}\bar{\theta}_l}\right|_{t=0}\right)$
+	  \item 
+	    $q_v \!=\! {\color<3->{red}q_t} - \!\!\overbrace{\sum\limits_{i \in cell}\!\!\frac{\nicefrac{4}{3}\,\,\pi \, n_i \, r_i^3 \rho_{w}}{\Delta v\,\, \rho_d}}^{q_l}$
+	    \hfill $\leadsto$ no S=1 assumption
+	  \vspace{.1cm}
+	  \item 
+            $\theta_d \!=\! \underbrace{\left({\color<3->{red}\theta_l} + \frac{{\color<3->{red}q_t} - q_v}{{\color<3->{red}\pi}} \frac{L}{c_{pd}} \right)}_{\theta} \cdot \left( 1 + q_v \frac{R_v}{R_v}\right)^{\nicefrac{R_d}{c_{pd}}}$
+          \item 
+            $\rho\vec{u} = {\color<3->{red}\rho_b \vec{u}}$
+	    \hfill $\leadsto$ consistent with heat/moisture advection
+	\end{itemize}
+      \end{column}
+    \end{columns}
+    }
+  }
+
+  \fram{\pgfimage[width=\textwidth]{017}}
+  \fram{\pgfimage[width=\textwidth]{018}}
+  \fram{\pgfimage[width=\textwidth]{019}}
+  \fram{\pgfimage[width=\textwidth]{020}}
+  \fram{\pgfimage[width=\textwidth]{021}}
+  \fram{\pgfimage[width=\textwidth]{022}}
+  \fram{\pgfimage[width=\textwidth]{023}}
+  \fram{\pgfimage[width=\textwidth]{024}}
+  \fram{\pgfimage[width=\textwidth]{025}}
+  \fram{\pgfimage[width=\textwidth]{026}}
+  \fram{\pgfimage[width=\textwidth]{027}}
+  \fram{\pgfimage[width=\textwidth]{028}}
+  \fram{\pgfimage[width=\textwidth]{029}}
+  \fram{\pgfimage[width=\textwidth]{030}}
+  \fram{\pgfimage[width=\textwidth]{031}}
+  \fram{\pgfimage[width=\textwidth]{032}}
+  \fram{\pgfimage[width=\textwidth]{033}}
+  \fram{\pgfimage[width=\textwidth]{034}}
+  \fram{\pgfimage[width=\textwidth]{035}}
+  \fram{\pgfimage[width=\textwidth]{036}}
+  \fram{\pgfimage[width=\textwidth]{037}}
+  \fram{\pgfimage[width=\textwidth]{038}}
+  \fram{\pgfimage[width=\textwidth]{039}}
+  \fram{\pgfimage[width=\textwidth]{040}}
+  \fram{\pgfimage[width=\textwidth]{041}}
+  \fram{\pgfimage[width=\textwidth]{042}}
+  \fram{\pgfimage[width=\textwidth]{043}}
+\end{document}

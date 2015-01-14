@@ -8,6 +8,8 @@
     - diag.py          ~100  (fielddump-compatible separate nc file for cloud properties; only place where C/F memory layout conv needed additional calc.)
     - .travis.yml       ~50  (automated in-the-cloud test on a fresh Ubuntu install; incl. DALES clone, patch & compilation)
     - plot.py           ~50  (wip, uses Python-gnuplot)
+
+
   - compiled:
     - ptrutil.so (to be loaded via LD_SO_PRELOAD)
     - libdales4.so (system-installed)
@@ -73,3 +75,4 @@
   - teaching
   - postdoc (MC?)
   - hints on handling contributions
+

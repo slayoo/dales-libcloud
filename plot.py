@@ -3,24 +3,30 @@
 import numpy, Gnuplot
 from scipy.io import netcdf
 
-rng_lwp = (2e-5,   1     )
-rng_ref = (2.5e-6, 25e-6 )
-rng_lwc = (.01e-3, .9e-3 )
+rng_lwp = (2e-5,   1      )
+rng_ref = (1.5e-6, 21e-6  )
+rng_lwc = (.05e-3, .75e-3 )
+rng_nc  = (10e6,   160e6  )
+
 
 def path(n, t, var, mlt, dz): #TODO: multiply by rho_d
   path = numpy.sum(numpy.squeeze(n.variables[var][t,:,:,:]), axis=0) * dz * mlt
-  print numpy.amin(path), numpy.amax(path)
   return path 
 
 def prof(n, t, var, mlt):
-  vals = numpy.squeeze(n.variables[var][t,:,:,:]) * mlt
-  vals[vals < rng_lwc[0]] = numpy.nan
+  vals = numpy.nan_to_num(numpy.squeeze(n.variables[var][t,:,:,:])) * mlt
+  if var == "qc" or var == "ql": 
+    vals[vals < rng_lwc[0]] = numpy.nan
+  if var == "nc": 
+    vals[numpy.squeeze(numpy.nan_to_num(n.variables["r_eff"][t,:,:,:]))<rng_ref[0]]= numpy.nan
+  if var == "r_eff": vals[vals < mlt*rng_ref[0]] = numpy.nan
   return numpy.nanmean(numpy.nanmean(vals, axis=1), axis=1)
 
 def hist2d(n, z, var, rng, bns, mlt):
   vals = numpy.squeeze(n.variables[var][t,:,:,:]).copy()
   vals[numpy.isnan(vals)]=-1
-  if var != "r_eff": vals[numpy.squeeze(numpy.nan_to_num(n.variables["r_eff"][t,:,:,:]))<rng_ref[0]]=-2
+  if var != "r_eff" and "r_eff" in n.variables: 
+    vals[numpy.squeeze(numpy.nan_to_num(n.variables["r_eff"][t,:,:,:]))<rng_ref[0]]=-2
   bins, xedges, yedges = numpy.histogram2d(
     vals.ravel(),
     numpy.repeat(z, vals.shape[1]*vals.shape[2]),
@@ -90,15 +96,15 @@ for t in range(nd.variables['time'].shape[0]):
   g('set logscale y2')
   g('set xrange [' + str(rng_lwp[0]) + ':' + str(rng_lwp[1]) + ']')
   g('set y2range [' + str(rng_lwp[0]) + ':' + str(rng_lwp[1]) + ']')
-  g('set xlabel "DALES LWP"')
-  g('set y2label "libcloudph++"')
+  g('set xlabel "DALES"')
+  g('set y2label "libcloudph++" offset -2')
   g('unset ytics')
-  g('unset ylabel')
+  g('set ylabel " "')
   g('set y2tics')
   g('set grid y2tics')
   g('set title "LWP [kg/m^2] (scatter plot)"')
   g.plot(
-    Gnuplot.Data(dlwp.ravel(), llwp.ravel(), with_='points pt 5 ps .3', axes='x1y2'),
+    Gnuplot.Data(dlwp.ravel(), llwp.ravel(), with_='points lt 4 pt 5 ps .3', axes='x1y2'),
     Gnuplot.Data(rng_lwp, rng_lwp, with_='lines lt rgb "black"', axes='x1y2')
   )
 
@@ -111,48 +117,63 @@ for t in range(nd.variables['time'].shape[0]):
 
   g('set ylabel "Z [km]"')
   g('set yrange [0:1.8]')
+  g('set yrange [.4:1.2]')
 
-  g('set title "mean in-cloud profiles"')
+  g('set palette defined (0 "white", .2 "white", .55 "orange", .66 "green", 1 "olive")')
+  g('set cblabel "freq of occurance, log sclale"')
+  g('unset cbtics')
+  g('unset cbrange')
+  g('set logscale cb')
+
   g('set key bottom right')
   g('set xlabel "q_c [g/kg]"')
   g('set xrange [' + str(rng_lwc[0] * 1e3) + ':' + str(rng_lwc[1] * 1e3) + ']')
-  g.plot(
-    Gnuplot.Data(prof(nd, t, "ql", 1e-5) * 1e3, z, with_='lines lw 2', title='DALES'),
-    Gnuplot.Data(prof(nl, t, "qc", 1e3) * 1e3, z, with_='lines', title='libcloudph++'),
-    '.4 lt 8 not', '1.2 lt 8 not'
+  g('set title "2D histogram (q_c > ' + str(rng_lwc[0]*1e3) + ')"')
+  bins, xedges, yedges = hist2d(nd, z, "ql", 
+    [
+      [rng_lwc[0]*1e5, rng_lwc[1]*1e5],
+      [z[0]-dz/2,  z[-1]+dz/2]
+    ],
+    [21,80],
+    1e5/1e3
+  )
+  g.splot(
+    Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0),
+    Gnuplot.Data(prof(nl, t, "qc", 1e3) * 1e3, z, numpy.zeros(z.shape), with_='lines lw 2', title='libcloudph++ mean'),
+    Gnuplot.Data(prof(nd, t, "ql", 1e-5) * 1e3, z, numpy.zeros(z.shape), with_='lines lt 6 lw 4', title='DALES mean')
   )
 
-  g('set yrange [.4:1.2]')
-  g('set title "2D histogram"')
+  g('set title "2D histogram (r_{eff} > ' + str(rng_ref[0]*1e6) + ')"')
 
   g('set xlabel "r_{eff} [μm]"')
   g('set xtics 5')
-  g('set xrange [2.5:20]')
+  g('set xrange [' + str(rng_ref[0]*1e6) + ':' + str(rng_ref[1]*1e6) + ']')
 
-  g('set cbrange [10:70]')
-  g('set palette defined (0 "white", .25 "orange", .75 "green", 1 "olive")')
-  g('set cblabel "freq of occurance, linear sclale"')
-  g('unset cbtics')
 
   bins, xedges, yedges = hist2d(nl, z, "r_eff", 
     [
       [rng_ref[0], rng_ref[1]],
       [z[0]-dz/2,  z[-1]+dz/2]
     ],
-    [18,80],
+    [21,80],
     1e-6
   )
-  g.splot(Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0))
+  g.splot(
+    Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0),
+    Gnuplot.Data(prof(nl, t, "r_eff", 1e6), z, numpy.zeros(z.shape), with_='lines lw 2 ', title='libcloudph++ mean'),
+  )
 
   g('set xlabel "n_c [cm^{-3}]"') #TODO: in fact it is still mg-1
-  g('set xrange [10:150]')
+  g('set xrange [' + str(rng_nc[0]/1e6) + ':' + str(rng_nc[1]/1e6) + ']')
   g('set xtics auto')
-  g('set cbrange [10:55]')
   bins, xedges, yedges = hist2d(nl, z, "nc", 
-    [[10e6,200e6],[z[0]-dz/2, z[-1]+dz/2]],
-    [19,80],
+    [[rng_nc[0],rng_nc[1]],[z[0]-dz/2, z[-1]+dz/2]],
+    [21,80],
     1e6
   )
-  g.splot(Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0))
+  g.splot(
+    Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0),
+    Gnuplot.Data(prof(nl, t, "nc", 1e-6), z, numpy.zeros(z.shape), with_='lines lw 2', title='libcloudph++ mean'),
+  )
 
   g('unset multiplot')

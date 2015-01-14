@@ -31,10 +31,12 @@ for f in ("lscale.inp.001", "prof.inp.001"):
   os.symlink('../' + bomexdir + f, testdir + f)
 shutil.copy(bomexdir + argfile, testdir)
 
+#TODO: force shorted DALES timestep (~2s) or enable adaptive one
 subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  ' + str(params["runtime"]) + '/', testdir + argfile]) 
 subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
 subprocess.call(['sed', '-i', '-e', 's/lfielddump  = .false./lfielddump  = .true./', testdir + argfile])
 
+#TODO: try with single-precision -> GPU would could then host twice more particles!
 def ptr2np(ptr, size_1, size_2 = 1, size_3 = 1):
   return numpy.frombuffer(
     ffi.buffer(ptr, size_1*size_2*size_3*numpy.dtype(numpy.float64).itemsize),

@@ -19,9 +19,9 @@ opts = lgrngn.opts_t()
 opts.sstp_cond = 40 # keep this setting low for Travis!
 opts.sstp_coal = 1  # keep this setting low for Travis!
 opts.cond = True
-opts.coal = True
-opts.adve = True
-opts.sedi = True
+opts.coal = True #TODO: is it turned off in DALES/BOMEX?
+opts.adve = True 
+opts.sedi = True #TODO: is it turned off in DALES/BOMEX?
 opts.chem = False
 opts.kernel = lgrngn.kernel_t.geometric
 
