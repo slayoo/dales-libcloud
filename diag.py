@@ -28,7 +28,7 @@ def newvar(f, name, longname, unit):
   f.variables[name].longname = longname
   f.variables[name].units = unit
 
-def diagnostics(prtcls):
+def diag(prtcls):
   global t,f,shape,outfreq
 
   # file definition
@@ -53,6 +53,7 @@ def diagnostics(prtcls):
     newvar(f, 'qc',      'cloud water mixing ratio',                          'kg/kg'     )
     newvar(f, 'r_eff',   'cloud droplet effective radius',                    'm'         )
     newvar(f, 'qr',      'rain water mixing ratio',                           'kg/kg'     )
+    #TODO: LWP, RWP tkaing into account which density to use
 
   # filling the file with data
   if t % outfreq == 0:

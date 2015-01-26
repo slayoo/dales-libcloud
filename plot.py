@@ -6,7 +6,7 @@ from scipy.io import netcdf
 rng_lwp = (2e-5,   1      )
 rng_ref = (1.5e-6, 21e-6  )
 rng_lwc = (.05e-3, .75e-3 )
-rng_nc  = (10e6,   160e6  )
+rng_nc  = (10e6,   1600e6  )
 
 
 def path(n, t, var, mlt, dz): #TODO: multiply by rho_d
@@ -76,7 +76,7 @@ for t in range(nd.variables['time'].shape[0]):
   g('set object 2 rectangle from screen .341,.003 to screen .999,.997 fillcolor rgb"#ffffff" behind')
 
   g('set label 1 "DALES (BOMEX, bulk μ-physics, t=' + str("%d" % (nd.variables['time'][t]/60)) + 'm)" at screen .004,.98 left font ",16"')
-  g('set label 2 "DALES-piggybacked libcloduph++ Lagrangian/Monte-Carlo μ-physics on a GPU" at screen .346,.98 left font ",16"')
+  g('set label 2 "off-line libcloduph++ Lagrangian/Monte-Carlo μ-physics on a GPU" at screen .346,.98 left font ",16"')
 
   g('set title "LWP [kg/m^2]"')
   dlwp = path(nd, t, 'ql', 1e-5, dz*1e3)
@@ -165,7 +165,7 @@ for t in range(nd.variables['time'].shape[0]):
 
   g('set xlabel "n_c [cm^{-3}]"') #TODO: in fact it is still mg-1
   g('set xrange [' + str(rng_nc[0]/1e6) + ':' + str(rng_nc[1]/1e6) + ']')
-  g('set xtics auto')
+  g('set xtics 250')
   bins, xedges, yedges = hist2d(nl, z, "nc", 
     [[rng_nc[0],rng_nc[1]],[z[0]-dz/2, z[-1]+dz/2]],
     [21,80],

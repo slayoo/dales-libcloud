@@ -1,5 +1,16 @@
 #!/usr/bin/python
 
+#TODO: next steps:
+# - coupling with radiation scheme through r_eff (probl. needs Sc case)
+# - piggy-backing like coupling (i.e. separate theta, r_t)
+# - full bi-directional coupling
+
+# misc:
+# - try to introduce the Thompson term to libcloudph++
+# - double check at which point in the time loop it is best to 
+#   plug libcloudph++ in
+# - check consequences of Boussinesq/anelastic choice in DALES
+
 import numpy, os, shutil, subprocess, cffi, libcloudphxx, traceback, math
 from params import params
 from diag import diag
@@ -18,7 +29,7 @@ flib = ffi.dlopen('libdales4.so')
 ffi.cdef("void save_ptr(char*,void*);")
 
 # Fortran functions
-ffi.cdef("void main(int, char**);")
+ffi.cdef("void main(int, char**);") #TODO: it is MAIN__ with Intel compiler + need the same change below
 
 
 # executing DALES with BOMEX set-up
@@ -77,7 +88,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     u0    = ptr2np(u0,    s1_u0,   s2_u0,   s3_u0  )
     v0    = ptr2np(v0,    s1_v0,   s2_v0,   s3_v0  )
     w0    = ptr2np(w0,    s1_w0,   s2_w0,   s3_w0  )
-    qt0   = ptr2np(qt0,   s1_qt0,  s2_qt0,  s3_qt0 )
+    qt0   = ptr2np(qt0,   s1_qt0,  s2_qt0,  s3_qt0 ) #TODO: this is specific humidity and not mixing ratio!
     thl0  = ptr2np(thl0,  s1_thl0, s2_thl0, s3_thl0)
 
     if first_timestep:
@@ -145,7 +156,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       #TODO: assert for no streaching (constant dz)
 
     # TODO: shouldn't advection be decoupled from condensation?
-    prtcls.diag_all()
+    prtcls.diag_all() # TODO: DALES q_t does not include q_r (nor q_a)
     prtcls.diag_wet_mom(3)
     qc = numpy.frombuffer(prtcls.outbuf()).reshape(arrays["rv"].shape) * 4./3. * math.pi * rho_w
     
