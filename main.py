@@ -6,7 +6,7 @@
 # - full bi-directional coupling
 
 # misc:
-# - try to introduce the Thompson term to libcloudph++
+# - try to introduce the Thomson term to libcloudph++ (to counteract the effect of "sticky" particles when dynamics are on)
 # - double check at which point in the time loop it is best to 
 #   plug libcloudph++ in
 # - check consequences of Boussinesq/anelastic choice in DALES

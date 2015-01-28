@@ -14,10 +14,10 @@ def lognormal(lnr):
 opts_init = lgrngn.opts_init_t()
 opts_init.dry_distros = { .61 : lognormal }
 opts_init.sd_conc_mean = 8 # keep this setting low for Travis!
+opts_init.sstp_cond = 40 # keep this setting low for Travis!
+opts_init.sstp_coal = 1  # keep this setting low for Travis!
 
 opts = lgrngn.opts_t()
-opts.sstp_cond = 40 # keep this setting low for Travis!
-opts.sstp_coal = 1  # keep this setting low for Travis!
 opts.cond = True
 opts.coal = True #TODO: is it turned off in DALES/BOMEX?
 opts.adve = True 
