@@ -109,7 +109,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       assert rhobf.shape[0] == rhobh.shape[0] == exnf.shape[0] == qt0.shape[2]
 
       # sub-second timestep to cope with condensation
-      assert dt / params["opts"].sstp_cond < 1
+      assert dt / params["opts_init"].sstp_cond < 1
 
       # we assume half levels are indexed below full levels      
       assert (rhobh > rhobf).all()
