@@ -193,7 +193,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       # initialising particle properties
       prtcls.init(arrays["th_d"], arrays["rv"], arrays["rhod"])
       # writing down state at t=0
-      diagnostics(prtcls)
+      diag(prtcls)
 
     # the timestepping
     prtcls.step_sync(
@@ -206,7 +206,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     ) 
     prtcls.step_async(params["opts"]) #TODO: handle the async logic
 
-    diagnostics(prtcls) 
+    diag(prtcls) 
 
     first_timestep = False
   except:

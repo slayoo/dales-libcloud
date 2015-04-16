@@ -16,6 +16,7 @@ opts_init.dry_distros = { .61 : lognormal }
 opts_init.sd_conc_mean = 8 # keep this setting low for Travis!
 opts_init.sstp_cond = 40 # keep this setting low for Travis!
 opts_init.sstp_coal = 1  # keep this setting low for Travis!
+opts_init.kernel = lgrngn.kernel_t.geometric
 
 opts = lgrngn.opts_t()
 opts.cond = True
@@ -23,7 +24,6 @@ opts.coal = True #TODO: is it turned off in DALES/BOMEX?
 opts.adve = True 
 opts.sedi = True #TODO: is it turned off in DALES/BOMEX?
 opts.chem = False
-opts.kernel = lgrngn.kernel_t.geometric
 
 params = {
   "opts"      : opts,

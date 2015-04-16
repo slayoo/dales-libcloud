@@ -28,7 +28,7 @@ install:
 script:
   - cd dales-libcloud
   - mv dales dales.newfiles
-  - git clone --depth=1 git://gitorious.org/dales/dales.git
+  - git clone --depth=1 git://github.com/dalesteam/dales
   - cp -R dales.newfiles/* dales/
   - rm -rf dales.newfiles
   - cd dales
