@@ -47,7 +47,7 @@ subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  ' + str
 subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
 subprocess.call(['sed', '-i', '-e', 's/lfielddump  = .false./lfielddump  = .true./', testdir + argfile])
 
-#TODO: try with single-precision -> GPU would could then host twice more particles!
+#TODO: try with single-precision -> GPU could then host twice more particles!
 def ptr2np(ptr, size_1, size_2 = 1, size_3 = 1):
   return numpy.frombuffer(
     ffi.buffer(ptr, size_1*size_2*size_3*numpy.dtype(numpy.float64).itemsize),
@@ -72,6 +72,12 @@ def th_std2dry(th, rv):
   from libcloudphxx.common import R_v, R_d, c_pd
   return th * (1 + rv * R_v / R_d)**(R_d/c_pd)
 
+def q2r(q):
+  return q / (1 - q)
+
+def r2q(r):
+  return r / (1 + r)
+
 @ffi.callback("bool(double, double, double, double, double*, int,      double*, int,      double*, int,     double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
 def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   s1_rhobh, exnf,    s1_exnf, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
   try:
@@ -88,7 +94,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     u0    = ptr2np(u0,    s1_u0,   s2_u0,   s3_u0  )
     v0    = ptr2np(v0,    s1_v0,   s2_v0,   s3_v0  )
     w0    = ptr2np(w0,    s1_w0,   s2_w0,   s3_w0  )
-    qt0   = ptr2np(qt0,   s1_qt0,  s2_qt0,  s3_qt0 ) #TODO: this is specific humidity and not mixing ratio!
+    qt0   = ptr2np(qt0,   s1_qt0,  s2_qt0,  s3_qt0 ) 
     thl0  = ptr2np(thl0,  s1_thl0, s2_thl0, s3_thl0)
 
     if first_timestep:
@@ -114,9 +120,9 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       arrays["rhod"]    = numpy.empty((nz,))
       arrays["th_d"]    = numpy.empty((nx,   ny,   nz  ))
       arrays["rv"]      = numpy.empty((nx,   ny,   nz  ))
-      arrays["rhod_Cx"] = numpy.empty((nx+1, ny,   nz  ))
-      arrays["rhod_Cy"] = numpy.empty((nx,   ny+1, nz  ))
-      arrays["rhod_Cz"] = numpy.empty((nx,   ny,   nz+1))
+      arrays["Cx"]      = numpy.empty((nx+1, ny,   nz  ))
+      arrays["Cy"]      = numpy.empty((nx,   ny+1, nz  ))
+      arrays["Cz"]      = numpy.empty((nx,   ny,   nz+1))
 
       # initialising libcloudph++
       params["opts_init"].dt = dt
@@ -142,7 +148,7 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
 
       # calculating rho_d profile (constant-in-time)
       # assuming there is no liquid water at t==0
-      rv = qt0[ 1:-1, 1:-1, 0:-1].mean(axis=0).mean(axis=0)
+      rv = q2r(qt0[ 1:-1, 1:-1, 0:-1].mean(axis=0).mean(axis=0))
       pd = exnf[0:-1]**(c_pd / R_d) * p_1000 * eps / (rv + eps)
       T  = exnf[0:-1] * thl0[1:-1, 1:-1, 0:-1].mean(axis=0).mean(axis=0)
       arrays["rhod"][:] = pd / R_d / T
@@ -158,10 +164,10 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     # TODO: shouldn't advection be decoupled from condensation?
     prtcls.diag_all() # TODO: DALES q_t does not include q_r (nor q_a)
     prtcls.diag_wet_mom(3)
-    qc = numpy.frombuffer(prtcls.outbuf()).reshape(arrays["rv"].shape) * 4./3. * math.pi * rho_w
+    rc = numpy.frombuffer(prtcls.outbuf()).reshape(arrays["rv"].shape) * 4./3. * math.pi * rho_w
     
-    arrays["rv"  ][:,:,:] = qt0[1:-1, 1:-1, 0:-1] - qc
-    arrays["th_d"] = th_std2dry(thl0[1:-1, 1:-1, 0:-1] + qc / exnf[0:-1] * L / c_pd, arrays["rv"])
+    arrays["rv"  ][:,:,:] = q2r(qt0[1:-1, 1:-1, 0:-1]) - rc
+    arrays["th_d"] = th_std2dry(thl0[1:-1, 1:-1, 0:-1] + r2q(rc) / exnf[0:-1] * L / c_pd, arrays["rv"])
 
     # assert if temperature is properly recovered from rho_d and th_d?
     # (also assuming thl == theta hence only at t == 0)
@@ -179,9 +185,9 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     #TODO: asserts to understand rhob vs. exner
 
     # this assumes DALES u0, v0 and w0 have periodic condition in the halo slabs
-    arrays["rhod_Cx"][:, :, :] = u0[1:,   1:-1, 0:-1] * dt / dx * rhobf[0:-1].reshape(1,1,rhobf.shape[0]-1)
-    arrays["rhod_Cy"][:, :, :] = v0[1:-1, 1:,   0:-1] * dt / dy * rhobf[0:-1].reshape(1,1,rhobf.shape[0]-1)
-    arrays["rhod_Cz"][:, :, :] = w0[1:-1, 1:-1, 0:  ] * dt / dz * rhobh[0:  ].reshape(1,1,rhobh.shape[0]  ) 
+    arrays["Cx"][:, :, :] = u0[1:,   1:-1, 0:-1] * dt / dx
+    arrays["Cy"][:, :, :] = v0[1:-1, 1:,   0:-1] * dt / dy
+    arrays["Cz"][:, :, :] = w0[1:-1, 1:-1, 0:  ] * dt / dz 
 
     if first_timestep:
       # initialising particle properties
@@ -194,9 +200,9 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       params["opts"], 
       arrays["th_d"], 
       arrays["rv"], 
-      arrays["rhod_Cx"],
-      arrays["rhod_Cy"],
-      arrays["rhod_Cz"]
+      arrays["Cx"],
+      arrays["Cy"],
+      arrays["Cz"]
     ) 
     prtcls.step_async(params["opts"]) #TODO: handle the async logic
 
