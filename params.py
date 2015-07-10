@@ -13,7 +13,7 @@ def lognormal(lnr):
 
 opts_init = lgrngn.opts_init_t()
 opts_init.dry_distros = { .61 : lognormal }
-opts_init.sd_conc_mean = 8 # keep this setting low for Travis!
+opts_init.sd_conc_mean = .1 # keep this setting low for Travis!
 opts_init.sstp_cond = 40 # keep this setting low for Travis!
 opts_init.sstp_coal = 1  # keep this setting low for Travis!
 opts_init.kernel = lgrngn.kernel_t.geometric

@@ -1,7 +1,7 @@
 diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/CMakeLists.txt dales/CMakeLists.txt
 --- dales.orig/CMakeLists.txt	2014-11-26 20:40:51.175434894 +0100
-+++ dales/CMakeLists.txt	2014-12-01 16:18:10.034973179 +0100
-@@ -27,7 +27,7 @@
++++ dales/CMakeLists.txt	2015-07-10 14:56:25.359989525 +0200
+@@ -27,12 +27,14 @@
    set(CMAKE_Fortran_FLAGS_RELEASE "-O3" CACHE STRING "")
    set(CMAKE_Fortran_FLAGS_DEBUG "-traceback -fpe1 -O0 -g -check all" CACHE STRING "")
  else()
@@ -10,9 +10,16 @@ diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.o
    set(CMAKE_Fortran_FLAGS "-finit-real=nan -W -Wall -fdefault-real-8 -ffree-line-length-none" CACHE STRING "")
    set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3" CACHE STRING "")
    set (CMAKE_Fortran_FLAGS_DEBUG   "-fbounds-check -fbacktrace -fno-f2c -O0 -g -ffpe-trap=invalid,zero,overflow" CACHE STRING "")
+ endif()
+ 
++set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -cpp")
++
+ ## Project parameters
+ PROJECT(DALES Fortran)
+ cmake_minimum_required(VERSION 2.6)
 diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/CMakeLists.txt dales/src/CMakeLists.txt
 --- dales.orig/src/CMakeLists.txt	2014-11-26 20:40:51.059434900 +0100
-+++ dales/src/CMakeLists.txt	2014-12-01 16:18:10.094973176 +0100
++++ dales/src/CMakeLists.txt	2015-07-10 14:52:27.679989723 +0200
 @@ -1,5 +1,10 @@
  set(target_name dales4)
  FILE(GLOB sourcefiles "*.f90")
@@ -39,7 +46,6 @@ diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.o
      if(.not.(lfielddump)) return
      dt_lim = min(dt_lim,tnext)
  
-Binary files dales.orig/src/.modthermodynamics.f90.swp and dales/src/.modthermodynamics.f90.swp differ
 diff -ruN '--exclude=.git' '--exclude=build' '--exclude=modlibcloud.f90' dales.orig/src/program.f90 dales/src/program.f90
 --- dales.orig/src/program.f90	2014-11-26 20:40:51.055434900 +0100
 +++ dales/src/program.f90	2015-01-07 20:55:43.875329519 +0100

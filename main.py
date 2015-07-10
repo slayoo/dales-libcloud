@@ -1,16 +1,5 @@
 #!/usr/bin/python
 
-#TODO: next steps:
-# - coupling with radiation scheme through r_eff (probl. needs Sc case)
-# - piggy-backing like coupling (i.e. separate theta, r_t)
-# - full bi-directional coupling
-
-# misc:
-# - try to introduce the Thomson term to libcloudph++ (to counteract the effect of "sticky" particles when dynamics are on)
-# - double check at which point in the time loop it is best to 
-#   plug libcloudph++ in
-# - check consequences of Boussinesq/anelastic choice in DALES
-
 import numpy, os, shutil, subprocess, cffi, libcloudphxx, traceback, math
 from params import params
 from diag import diag
@@ -28,26 +17,21 @@ flib = ffi.dlopen('libdales4.so')
 # C functions
 ffi.cdef("void save_ptr(char*,void*);")
 
-# Fortran functions
-ffi.cdef("void main(int, char**);") #TODO: it is MAIN__ with Intel compiler + need the same change below
-
-
 # executing DALES with BOMEX set-up
 bomexdir = "./dales/cases/bomex/"
 testdir = "./test/"
-argfile = "namoptions.001"
+argfile = "namoptions"
 
 os.mkdir(testdir)
 for f in ("lscale.inp.001", "prof.inp.001"):
   os.symlink('../' + bomexdir + f, testdir + f)
-shutil.copy(bomexdir + argfile, testdir)
+shutil.copy(bomexdir + argfile + '.001', testdir + argfile) # stripping .001 as this will be the default handled when compiled with ifort which generates no-argument main()
 
-#TODO: force shorted DALES timestep (~2s) or enable adaptive one
+#TODO: force shorter DALES timestep (~2s) or enable adaptive one
 subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  ' + str(params["runtime"]) + '/', testdir + argfile]) 
 subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
 subprocess.call(['sed', '-i', '-e', 's/lfielddump  = .false./lfielddump  = .true./', testdir + argfile])
 
-#TODO: try with single-precision -> GPU could then host twice more particles!
 def ptr2np(ptr, size_1, size_2 = 1, size_3 = 1):
   return numpy.frombuffer(
     ffi.buffer(ptr, size_1*size_2*size_3*numpy.dtype(numpy.float64).itemsize),
@@ -213,4 +197,16 @@ clib.save_ptr(ptrfname, micro_step)
 
 # running DALES
 os.chdir(testdir)
-flib.main(2, [ ffi.new("char[]", ""), ffi.new("char[]", argfile) ])
+ok = False
+for main in [
+  'MAIN__', # ifort
+  'main'    # gfortran
+]:
+  ffi.cdef("void "+main+"(int, char**);") 
+  try:
+    getattr(flib, main)(2, [ ffi.new("char[]", ""), ffi.new("char[]", argfile) ])
+  except:
+    pass
+  else:
+    ok = True
+if not ok: raise Exception("main call failed")

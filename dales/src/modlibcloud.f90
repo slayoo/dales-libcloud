@@ -51,34 +51,37 @@ module modlibcloud
     end
   end interface
 
-  type(c_funptr) :: cptr
-  procedure(micro_step_py), pointer :: fptr => NULL()
+  type(c_funptr) :: cpntr
+  procedure(micro_step_py), pointer :: fpntr => NULL()
   real a_real
 
   contains
 
   subroutine piggyback_libcloudphxx_lgrngn
+#ifdef __INTEL_COMPILER
+    use ifport
+#endif
     implicit none
 
     character(10) :: uid, pid
 
-    if (associated(fptr) .eqv. .false.) then 
+    if (associated(fpntr) .eqv. .false.) then 
       ! assert for numerical precision
       if (sizeof(a_real) .ne. c_double) stop("DALES does not use double precision!")
 
       ! load pointer to Python micro_step() routine (getuid() and getpid() are GNU extensions)
       write (uid, "(I10.0)") getuid()
       write (pid, "(I10.0)") getpid()
-      call load_ptr("/tmp/micro_step-" // trim(adjustl(uid)) // "-" // trim(adjustl(pid)) // ".ptr" // c_null_char,cptr)
+      call load_ptr("/tmp/micro_step-" // trim(adjustl(uid)) // "-" // trim(adjustl(pid)) // ".ptr" // c_null_char,cpntr)
  
       ! associate the C pointer with the F pointer
-      call c_f_procpointer(cptr, fptr)
+      call c_f_procpointer(cpntr, fpntr)
     end if
 
     if (rk3step /= 3) return 
     if (ntimee == 0) return ! spinup
 
-    if (.not. fptr(                                        &
+    if (.not. fpntr(                                       &
       rdt, dx, dy, dz,                                     &
       exnf,  size(exnf, 1),                                &
       u0,    size(u0,    1), size(u0,   2), size(u0,   3), &
@@ -87,5 +90,5 @@ module modlibcloud
       qt0,   size(qt0,   1), size(qt0,  2), size(qt0,  3), &
       thl0,  size(thl0,  1), size(thl0, 2), size(thl0, 3)  &
     )) stop("Error in Python!!!")
-  end
+  end subroutine
 end module
