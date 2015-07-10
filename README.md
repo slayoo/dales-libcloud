@@ -8,7 +8,7 @@ Credits (alph. order):
 
 Summary:
   - dales.diff       (CMake: shared lib & hardcoded mpi compiler; fielddump @t=0; modlibcloud call)
-  - modlibcloud.f90  (load fprt; call Python passing dt,dx,rhob,exnf,uvw,qt,th; skip rk3 & spinup; error handing)
+  - modlibcloud.f90  (load fprt; call Python passing dt,dx,exnf,uvw,qt,th; skip rk3 & spinup; error handing)
   - ptrutil.c        (file store/load f-ction pointer - impossible in Fortran?; cubmersone in Python)
   - main.py          (Py->C->F->Py logic; state var conversion (with sanity checks); grid geometry; lib & diag calls; DALES namelist overrides)
   - params.py        (process toggling; aerosol; numerical params - sd_conc, substeps)

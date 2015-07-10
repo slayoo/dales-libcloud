@@ -78,8 +78,8 @@ def q2r(q):
 def r2q(r):
   return r / (1 + r)
 
-@ffi.callback("bool(double, double, double, double, double*, int,      double*, int,      double*, int,     double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
-def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   s1_rhobh, exnf,    s1_exnf, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
+@ffi.callback("bool(double, double, double, double, double*, int,     double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
+def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
   try:
     global prtcls, first_timestep, arrays
 
@@ -88,8 +88,6 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
     # - DALES has unit-length halo in x and y
 
     #TODO: some only in the first timestep?
-    rhobf = ptr2np(rhobf, s1_rhobf)
-    rhobh = ptr2np(rhobh, s1_rhobh)
     exnf  = ptr2np(exnf,  s1_exnf)
     u0    = ptr2np(u0,    s1_u0,   s2_u0,   s3_u0  )
     v0    = ptr2np(v0,    s1_v0,   s2_v0,   s3_v0  )
@@ -106,13 +104,10 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
       assert u0.shape[0] == v0.shape[0] == w0.shape[0] == qt0.shape[0] == thl0.shape[0]
       assert u0.shape[1] == v0.shape[1] == w0.shape[1] == qt0.shape[1] == thl0.shape[1]
       assert u0.shape[2] == v0.shape[2] == w0.shape[2] == qt0.shape[2] == thl0.shape[2]
-      assert rhobf.shape[0] == rhobh.shape[0] == exnf.shape[0] == qt0.shape[2]
+      assert exnf.shape[0] == qt0.shape[2]
 
       # sub-second timestep to cope with condensation
       assert dt / params["opts_init"].sstp_cond < 1
-
-      # we assume half levels are indexed below full levels      
-      assert (rhobh > rhobf).all()
 
       nx, ny, nz = qt0.shape[0]-2, qt0.shape[1]-2, qt0.shape[2]-1
 
@@ -181,8 +176,6 @@ def micro_step(     dt,     dx,     dy,     dz,     rhobf,   s1_rhobf, rhobh,   
               exnf[k] * thl0[i+1, j+1, k] - libcloudphxx.common.T(arrays["th_d"][i,j,k], arrays["rhod"][k])
             )
       assert mxdiff < 0.05
-
-    #TODO: asserts to understand rhob vs. exner
 
     # this assumes DALES u0, v0 and w0 have periodic condition in the halo slabs
     arrays["Cx"][:, :, :] = u0[1:,   1:-1, 0:-1] * dt / dx
