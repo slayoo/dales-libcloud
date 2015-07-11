@@ -71,7 +71,6 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
     # - DALES has an unused top level
     # - DALES has unit-length halo in x and y
 
-    #TODO: some only in the first timestep?
     exnf  = ptr2np(exnf,  s1_exnf)
     u0    = ptr2np(u0,    s1_u0,   s2_u0,   s3_u0  )
     v0    = ptr2np(v0,    s1_v0,   s2_v0,   s3_v0  )
@@ -107,7 +106,7 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
       params["opts_init"].dt = dt
       params["opts_init"].dx, params["opts_init"].dy, params["opts_init"].dz = dx, dy, dz
       params["opts_init"].nx, params["opts_init"].ny, params["opts_init"].nz = nx, ny, nz
-      params["opts_init"].x1, params["opts_init"].y1, params["opts_init"].z1 = dx*nx, dy*ny, dz*nz #TODO: double check
+      params["opts_init"].x1, params["opts_init"].y1, params["opts_init"].z1 = dx*nx, dy*ny, dz*nz
 
       try:
         print("Trying with CUDA backend..."),
@@ -140,7 +139,6 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
 
       #TODO: assert for no streaching (constant dz)
 
-    # TODO: shouldn't advection be decoupled from condensation?
     prtcls.diag_all() # TODO: DALES q_t does not include q_r (nor q_a)
     prtcls.diag_wet_mom(3)
     rc = numpy.frombuffer(prtcls.outbuf()).reshape(arrays["rv"].shape) * 4./3. * math.pi * rho_w
