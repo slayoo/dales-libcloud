@@ -27,9 +27,8 @@ for f in ("lscale.inp.001", "prof.inp.001"):
   os.symlink('../' + bomexdir + f, testdir + f)
 shutil.copy(bomexdir + argfile + '.001', testdir + argfile) # stripping .001 as this will be the default handled when compiled with ifort which generates no-argument main()
 
-#TODO: force shorter DALES timestep (~2s) or enable adaptive one
 subprocess.call(['sed', '-i', '-e', 's/runtime    =  28800/runtime    =  ' + str(params["runtime"]) + '/', testdir + argfile]) 
-subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false./', testdir + argfile])
+subprocess.call(['sed', '-i', '-e', 's/ladaptive  = .true./ladaptive  = .false.\\\ndtmax = 2/', testdir + argfile])
 subprocess.call(['sed', '-i', '-e', 's/lfielddump  = .false./lfielddump  = .true./', testdir + argfile])
 
 def ptr2np(ptr, size_1, size_2 = 1, size_3 = 1):

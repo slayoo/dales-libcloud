@@ -30,6 +30,6 @@ opts.chem = False
 params = {
   "opts"      : opts,
   "opts_init" : opts_init,
-  "runtime"   : 600 # DALES override
+  "runtime"   : 60 # DALES override
 }
 
