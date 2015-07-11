@@ -55,11 +55,11 @@ def th_std2dry(th, rv):
   from libcloudphxx.common import R_v, R_d, c_pd
   return th * (1 + rv * R_v / R_d)**(R_d/c_pd)
 
-def q2r(q):
-  return q / (1 - q)
+def qt2rt(qt):
+  return qt / (1 - qt)
 
-def r2q(r):
-  return r / (1 + r)
+def rc2qc(rc,rv):
+  return rc / (1 + rc + rv)
 
 @ffi.callback("bool(double, double, double, double, double*, int,     double*, int,   int,   int,   double*, int,   int,   int,   double*, int,   int,   int,   double*, int,    int,    int,    double*, int,     int,     int    )")
 def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s1_u0, s2_u0, s3_u0, v0,      s1_v0, s2_v0, s3_v0, w0,      s1_w0, s2_w0, s3_w0, qt0,     s1_qt0, s2_qt0, s3_qt0, thl0,    s1_thl0, s2_thl0, s3_thl0):
@@ -125,7 +125,7 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
 
       # calculating rho_d profile (constant-in-time)
       # assuming there is no liquid water at t==0
-      rv = q2r(qt0[ 1:-1, 1:-1, 0:-1].mean(axis=0).mean(axis=0))
+      rv = qt2rt(qt0[ 1:-1, 1:-1, 0:-1].mean(axis=0).mean(axis=0))
       pd = exnf[0:-1]**(c_pd / R_d) * p_1000 * eps / (rv + eps)
       T  = exnf[0:-1] * thl0[1:-1, 1:-1, 0:-1].mean(axis=0).mean(axis=0)
       arrays["rhod"][:] = pd / R_d / T
@@ -142,8 +142,8 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
     prtcls.diag_wet_mom(3)
     rc = numpy.frombuffer(prtcls.outbuf()).reshape(arrays["rv"].shape) * 4./3. * math.pi * rho_w
     
-    arrays["rv"  ][:,:,:] = q2r(qt0[1:-1, 1:-1, 0:-1]) - rc
-    arrays["th_d"] = th_std2dry(thl0[1:-1, 1:-1, 0:-1] + r2q(rc) / exnf[0:-1] * L / c_pd, arrays["rv"])
+    arrays["rv"  ][:,:,:] = qt2rt(qt0[1:-1, 1:-1, 0:-1]) - rc
+    arrays["th_d"] = th_std2dry(thl0[1:-1, 1:-1, 0:-1] + rc2qc(rc,arrays["rv"]) / exnf[0:-1] * L / c_pd, arrays["rv"])
 
     # assert if temperature is properly recovered from rho_d and th_d?
     # (also assuming thl == theta hence only at t == 0)
@@ -167,7 +167,7 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
       # initialising particle properties
       prtcls.init(arrays["th_d"], arrays["rv"], arrays["rhod"])
       # writing down state at t=0
-      diag(prtcls)
+      diag(prtcls, arrays["rv"])
 
     # the timestepping
     prtcls.step_sync(
@@ -180,7 +180,7 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
     ) 
     prtcls.step_async(params["opts"]) #TODO: handle the async logic
 
-    diag(prtcls) 
+    diag(prtcls, arrays["rv"]) 
 
     first_timestep = False
   except:

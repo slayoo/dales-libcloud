@@ -87,7 +87,7 @@ for t in range(nd.variables['time'].shape[0]):
   g('unset label 1')
   g('unset label 2')
 
-  llwp = path(nl, t, 'qc', 1e3, dz*1e3) #TODO: get rid of 1e3 after correcting diag.py
+  llwp = path(nl, t, 'qc', 1, dz*1e3)
   g.splot(Gnuplot.GridData(llwp, y, x, with_='image', binary=0))
 
   #print numpy.corrcoef(llwp.flat, dlwp.flat)

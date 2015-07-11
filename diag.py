@@ -5,11 +5,11 @@ t = 0
 f = None
 dtav = 60 # TODO: read it from file or pass it?
 shape = None
+rho_w = 1e3
 outfreq = None
 
 # aerosol / cloud / rain thresholds
 th_ac = 0.5e-6
-th_cr = 25e-6
 
 def getbuf(prtcls):
   return numpy.swapaxes(
@@ -28,7 +28,7 @@ def newvar(f, name, longname, unit):
   f.variables[name].longname = longname
   f.variables[name].units = unit
 
-def diag(prtcls):
+def diag(prtcls, rv):
   global t,f,shape,outfreq
 
   # file definition
@@ -50,10 +50,9 @@ def diag(prtcls):
     newvar(f, 'na',      'aerosol concentration (per mass of dry air)',       '1/kg'      )
     newvar(f, 'nc',      'cloud droplet concentration (per mass of dry air)', '1/kg'      )
     newvar(f, 'nr',      'rain drop concentration (per mass of dry air)',     '1/kg'      )
-    newvar(f, 'qc',      'cloud water mixing ratio',                          'kg/kg'     )
+    newvar(f, 'qc',      'cloud water specific humidity',                     'kg/kg'     )
     newvar(f, 'r_eff',   'cloud droplet effective radius',                    'm'         )
-    newvar(f, 'qr',      'rain water mixing ratio',                           'kg/kg'     )
-    #TODO: LWP, RWP tkaing into account which density to use
+    newvar(f, 'qr',      'rain water specific humidity',                      'kg/kg'     )
 
   # filling the file with data
   if t % outfreq == 0:
@@ -72,21 +71,16 @@ def diag(prtcls):
     f.variables['na'][rec,:,:,:] = getbuf(prtcls)
 
     # ql & nc & r_eff
-    prtcls.diag_wet_rng(th_ac, th_cr)
+    prtcls.diag_wet_rng(th_ac, 1)
     prtcls.diag_wet_mom(0)
     f.variables['nc'][rec,:,:,:] = getbuf(prtcls)
     prtcls.diag_wet_mom(3)
     f.variables['qc'][rec,:,:,:] = getbuf(prtcls)
     prtcls.diag_wet_mom(2)
     f.variables['r_eff'][rec,:,:,:] = f.variables['qc'][rec,:,:,:] / getbuf(prtcls)
-    f.variables['qc'][rec,:,:,:] *= 4./3 * math.pi # * rho_w - TODO! 1e3
-
-    # qr & nr
-    prtcls.diag_wet_rng(th_cr, 1)
-    prtcls.diag_wet_mom(0)
-    f.variables['nr'][rec,:,:,:] = getbuf(prtcls)
-    prtcls.diag_wet_mom(3)
-    f.variables['qr'][rec,:,:,:] = getbuf(prtcls) * 4./3 * math.pi # * rho_w - TODO: 1e3!
+    f.variables['qc'][rec,:,:,:] *= 4./3 * math.pi * rho_w 
+    # converting mixing ratio to liquid water spec. humidity
+    f.variables['qc'][rec,:,:,:] /= (f.variables['qc'][rec,:,:,:] + numpy.swapaxes(rv,0,2) + 1)
 
   # incrementing timestep counter
   t = t+1
