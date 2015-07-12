@@ -49,10 +49,10 @@ def diag(prtcls, rv):
     newvar(f, 'sd_conc', 'super-droplet concentration',                       '1/dx/dy/dz') # TODO: int?
     newvar(f, 'na',      'aerosol concentration (per mass of dry air)',       '1/kg'      )
     newvar(f, 'nc',      'cloud droplet concentration (per mass of dry air)', '1/kg'      )
-    newvar(f, 'nr',      'rain drop concentration (per mass of dry air)',     '1/kg'      )
+#    newvar(f, 'nr',      'rain drop concentration (per mass of dry air)',     '1/kg'      )
     newvar(f, 'qc',      'cloud water specific humidity',                     'kg/kg'     )
     newvar(f, 'r_eff',   'cloud droplet effective radius',                    'm'         )
-    newvar(f, 'qr',      'rain water specific humidity',                      'kg/kg'     )
+#    newvar(f, 'qr',      'rain water specific humidity',                      'kg/kg'     )
 
   # filling the file with data
   if t % outfreq == 0:
