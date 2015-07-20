@@ -43,12 +43,13 @@ first_timestep = True
 arrays = {}
 
 # constants from DALES #TODO: allow overriding them in libcloud? or override them in DALES?
-L = 2.5e6
-c_pd = 1004.
-p_1000 = 100000.
-R_d = 287.0
-R_v = 461.5
+c_pd = 1004. # 1005     in libcloud
+R_d = 287.0  # 287.0025 in libcloud
+R_v = 461.5  # 461.9146 in libcloud
+
 eps = R_d / R_v
+L = 2.5e6
+p_1000 = 100000.
 rho_w = 1e3
 
 def th_std2dry(th, rv):
@@ -138,7 +139,8 @@ def micro_step(     dt,     dx,     dy,     dz,     exnf,    s1_exnf, u0,      s
 
       #TODO: assert for no streaching (constant dz)
 
-    prtcls.diag_all() # TODO: DALES q_t does not include q_r (nor q_a)
+    # TODO: DALES q_t does not include q_r (nor q_a)
+    prtcls.diag_all()
     prtcls.diag_wet_mom(3)
     rc = numpy.frombuffer(prtcls.outbuf()).reshape(arrays["rv"].shape) * 4./3. * math.pi * rho_w
     

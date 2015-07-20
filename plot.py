@@ -3,14 +3,14 @@
 import numpy, Gnuplot
 from scipy.io import netcdf
 
-rng_lwp = (2e-5,   1      )
-rng_ref = (1.5e-6, 21e-6  )
-rng_lwc = (.05e-3, .75e-3 )
-rng_nc  = (10e6,   1600e6  )
+rng_lwp = numpy.array([.05,   .5      ])
+rng_ref = numpy.array([1.5e-6, 21e-6  ])
+rng_lwc = numpy.array([.05e-3, .75e-3 ])
+rng_nc  = numpy.array([10e6,   1600e6  ])
 
 
-def path(n, t, var, mlt, dz): #TODO: multiply by rho_d
-  path = numpy.sum(numpy.squeeze(n.variables[var][t,:,:,:]), axis=0) * dz * mlt
+def path(n, t, var, mlt, dz, rho): 
+  path = numpy.sum(numpy.squeeze(n.variables[var][t,:,:,:]*rho.reshape((rho.shape[0], 1, 1))), axis=0) * dz * mlt
   return path 
 
 def prof(n, t, var, mlt):
@@ -38,8 +38,10 @@ def hist2d(n, z, var, rng, bns, mlt):
   return bins, xedges, yedges
 
 
-nd = netcdf.netcdf_file('test.skua.3600/fielddump.000.001.nc', 'r')
-nl = netcdf.netcdf_file('test.skua.3600/libcloud.nc', 'r')
+root = 'test.skua_n1e3'
+nd = netcdf.netcdf_file(root + '/fielddump.000.001.nc', 'r')
+nl = netcdf.netcdf_file(root + '/libcloud.nc', 'r')
+np = netcdf.netcdf_file(root + '/profiles.001.nc', 'r')
 
 x = nd.variables['xt'][:] / 1e3
 y = nd.variables['yt'][:] / 1e3
@@ -49,12 +51,13 @@ dx = x[1] - x[0]
 dy = y[1] - y[0]
 dz = z[1] - z[0]
 
-g = Gnuplot.Gnuplot()# persist=1)
+g = Gnuplot.Gnuplot()
 
-g('set term pdf enhanced rounded size 24cm,16cm')
+g('set term pdf enhanced rounded')
 
 for t in range(nd.variables['time'].shape[0]):
-  #if t != 44: continue
+  if t != 45: continue
+  rhof = np.variables['dn0'][t/10,:] # TODO: get rid of /10 factor!
 
   g('reset')
   g('set xrange [0:' + str(x[-1]+dx/2) + ']')
@@ -65,51 +68,47 @@ for t in range(nd.variables['time'].shape[0]):
   g('set cbrange [' + str(rng_lwp[0]) + ':' + str(rng_lwp[1]) + ']')
   g('set cbtics offset -1')
   g('set palette defined (0 "white", .25 "blue", 1 "yellow")')
-  g('set logscale cb')
   g('set view map')
   g('set grid')
 
-  g('set output "plot/' + str("%03d" % t) + '.pdf"')
-  g('set multiplot layout 2,3')
 
-  g('set object 1 rectangle from screen .001,.003 to screen .338,.997 fillcolor rgb"#ffffff" behind')
-  g('set object 2 rectangle from screen .341,.003 to screen .999,.997 fillcolor rgb"#ffffff" behind')
-
-  g('set label 1 "DALES (BOMEX, bulk μ-physics, t=' + str("%d" % (nd.variables['time'][t]/60)) + 'm)" at screen .004,.98 left font ",16"')
-  g('set label 2 "off-line libcloduph++ Lagrangian/Monte-Carlo μ-physics on a GPU" at screen .346,.98 left font ",16"')
-
-  g('set title "LWP [kg/m^2]"')
-  dlwp = path(nd, t, 'ql', 1e-5, dz*1e3)
+  g('set title "DALES LWP [kg/m^2]"')
+  dlwp = path(nd, t, 'ql', 1e-5, dz*1e3, rhof)
+  g('set output "plot/' + str("%03d" % t) + '_lwpmap_dales.pdf"')
   g.splot(Gnuplot.GridData(dlwp, y, x, with_='image', binary=0))
 
-  g('unset object 1')
-  g('unset object 2')
-  g('unset label 1')
-  g('unset label 2')
 
-  llwp = path(nl, t, 'qc', 1, dz*1e3)
+  g('set title "libcloudph++ LWP [kg/m^2]"')
+  llwp = path(nl, t, 'qc', 1, dz*1e3, rhof)
+  g('set output "plot/' + str("%03d" % t) + '_lwpmap_libcloud.pdf"')
   g.splot(Gnuplot.GridData(llwp, y, x, with_='image', binary=0))
 
-  #print numpy.corrcoef(llwp.flat, dlwp.flat)
-
-  g('set logscale x')
-  g('set logscale y2')
   g('set xrange [' + str(rng_lwp[0]) + ':' + str(rng_lwp[1]) + ']')
   g('set y2range [' + str(rng_lwp[0]) + ':' + str(rng_lwp[1]) + ']')
   g('set xlabel "DALES"')
-  g('set y2label "libcloudph++" offset -2')
+  g('set y2label "libcloudph++" offset -1')
   g('unset ytics')
   g('set ylabel " "')
   g('set y2tics')
   g('set grid y2tics')
   g('set title "LWP [kg/m^2] (scatter plot)"')
+  g('set output "plot/' + str("%03d" % t) + '_lwpcorr.pdf"')
   g.plot(
     Gnuplot.Data(dlwp.ravel(), llwp.ravel(), with_='points lt 4 pt 5 ps .3', axes='x1y2'),
     Gnuplot.Data(rng_lwp, rng_lwp, with_='lines lt rgb "black"', axes='x1y2')
   )
 
+  g('set title "q_c [g/kg] (scatter plot)"')
+  g('set output "plot/' + str("%03d" % t) + '_qccorr.pdf"')
+  g('set xrange [' + str(rng_lwc[0] * 1e3) + ':' + str(rng_lwc[1] * 1e3) + ']')
+  g('set y2range [' + str(rng_lwc[0] * 1e3) + ':' + str(rng_lwc[1] * 1e3) + ']')
+  dqc = 1e3*1e-5*nd.variables['ql'][t,:,:,:]
+  lqc = 1e3*nl.variables['qc'][t,:,:,:]
+  g.plot(
+    Gnuplot.Data(dqc.ravel(), lqc.ravel(), with_='points lt 4 pt 5 ps .3', axes='x1y2'),
+    Gnuplot.Data(1e3*rng_lwc, 1e3*rng_lwc, with_='lines lt rgb "black"', axes='x1y2')
+  )
 
-  g('unset logscale')
   g('unset title')
   g('set ytics')
   g('unset y2tics')
@@ -137,9 +136,10 @@ for t in range(nd.variables['time'].shape[0]):
     [21,80],
     1e5/1e3
   )
+  g('set output "plot/' + str("%03d" % t) + '_prof_qc.pdf"')
   g.splot(
     Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0),
-    Gnuplot.Data(prof(nl, t, "qc", 1e3) * 1e3, z, numpy.zeros(z.shape), with_='lines lw 2', title='libcloudph++ mean'),
+    Gnuplot.Data(prof(nl, t, "qc", 1) * 1e3, z, numpy.zeros(z.shape), with_='lines lw 2', title='libcloudph++ mean'),
     Gnuplot.Data(prof(nd, t, "ql", 1e-5) * 1e3, z, numpy.zeros(z.shape), with_='lines lt 6 lw 4', title='DALES mean')
   )
 
@@ -158,12 +158,13 @@ for t in range(nd.variables['time'].shape[0]):
     [21,80],
     1e-6
   )
+  g('set output "plot/' + str("%03d" % t) + '_prof_reff.pdf"')
   g.splot(
     Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0),
     Gnuplot.Data(prof(nl, t, "r_eff", 1e6), z, numpy.zeros(z.shape), with_='lines lw 2 ', title='libcloudph++ mean'),
   )
 
-  g('set xlabel "n_c [cm^{-3}]"') #TODO: in fact it is still mg-1
+  g('set xlabel "n_c [mg^{-1}]"') 
   g('set xrange [' + str(rng_nc[0]/1e6) + ':' + str(rng_nc[1]/1e6) + ']')
   g('set xtics 250')
   bins, xedges, yedges = hist2d(nl, z, "nc", 
@@ -171,9 +172,8 @@ for t in range(nd.variables['time'].shape[0]):
     [21,80],
     1e6
   )
+  g('set output "plot/' + str("%03d" % t) + '_prof_nc.pdf"')
   g.splot(
     Gnuplot.GridData(bins, xedges, yedges, with_='image', binary=0),
     Gnuplot.Data(prof(nl, t, "nc", 1e-6), z, numpy.zeros(z.shape), with_='lines lw 2', title='libcloudph++ mean'),
   )
-
-  g('unset multiplot')

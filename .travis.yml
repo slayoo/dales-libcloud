@@ -45,3 +45,5 @@ script:
   - LD_LIBRARY_PATH=. LD_PRELOAD=ptrutil.so mpirun.mpich -np 1 python main.py 
   - rm -rf test
   - LD_LIBRARY_PATH=. LD_PRELOAD=ptrutil.so mpirun.mpich -np 1 python -O main.py 
+  - mkdir plot
+  - python plot.py
