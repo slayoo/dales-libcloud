@@ -12,7 +12,7 @@ install:
   # without it apt-get fails to install netcdf in the next step - no idea why
   - sudo apt-get install --no-install-recommends libnetcdfc7
   # OpenMP fails when used from within Python (seems it has to be compiled with --disable-dlopen to work)
-  - sudo apt-get install --no-install-recommends g++ gfortran libnetcdf-dev python-numpy python-cffi libblitz0-dev cmake libboost-python-dev libthrust-dev mpich libmpich-dev python-scipy python-gnuplot
+  - sudo apt-get install --no-install-recommends g++ gfortran libnetcdf-dev python-numpy python-cffi libblitz0-dev cmake libboost-python-dev libthrust-dev mpich libmpich-dev python-scipy gnuplot-nox python-gnuplot
 
   # libcloudphxx
   - cd ..
